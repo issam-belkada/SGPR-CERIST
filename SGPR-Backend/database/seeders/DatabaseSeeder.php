@@ -16,13 +16,15 @@ class DatabaseSeeder extends Seeder
         $this->call(PermissionsSeeder::class);
 
 
-        User::create([
+        $admin=User::create([
             'nom' => 'Admin', 'prenom' => 'SGPR',
             'email' => 'admin@cerist.dz',
             'password' => Hash::make('adminpassword'),
             'grade' => 'DR',
             'specialite' => 'Informatique',
         ]);
+        $admin->assignRole('Admin');
+
 
         // 2. Création des divisions
         $dsi = Division::create(['nom' => 'Division Systèmes d’Information', 'acronyme' => 'DSI']);
