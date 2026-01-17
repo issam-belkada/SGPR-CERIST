@@ -19,6 +19,8 @@ return new class extends Migration
         $table->text('resume');
         $table->text('problematique')->nullable();
         $table->text('objectifs')->nullable();
+        $table->string('equipe_service')->nullable();
+        $table->string('partenaire')->nullable();
         $table->integer('duree_mois');
         $table->date('date_debut')->nullable();
         $table->date('date_fin')->nullable();

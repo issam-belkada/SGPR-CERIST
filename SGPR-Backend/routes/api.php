@@ -5,6 +5,7 @@ use App\Http\Controllers\api\ProjetController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\WorkPackageController;
 use App\Http\Controllers\Api\ProductionController;
+use App\Http\Controllers\Api\BilanController;
 
 // Routes Publiques
 Route::post('/login', [AuthController::class, 'login']);
@@ -32,4 +33,12 @@ Route::middleware('auth:sanctum')->group(function () {
     // Productions Scientifiques & Tech
     Route::post('/projets/{projet}/productions-scientifiques', [ProductionController::class, 'storeScientifique']);
     Route::post('/projets/{projet}/productions-technologiques', [ProductionController::class, 'storeTechnologique']);
+
+    // Processus de Bilan
+    // 1. Sauvegarder ou modifier le brouillon
+    Route::post('/projets/{projet}/bilan/sauvegarder', [BilanController::class, 'storeOuUpdate']);
+    // 2. Action de soumission finale
+    Route::patch('/bilans/{bilan}/soumettre', [BilanController::class, 'soumettre']);
+    // 3. Téléchargement
+    Route::get('/bilans/{bilan}/pdf', [BilanController::class, 'telechargerPDF']);
 });

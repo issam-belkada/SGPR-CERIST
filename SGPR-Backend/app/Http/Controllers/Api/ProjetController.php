@@ -151,4 +151,54 @@ class ProjetController extends Controller
 
         return response()->json(['message' => 'Le projet est maintenant officiellement en cours.']);
     }
+
+
+    /**
+     * Ajouter un chercheur à l'équipe du projet.
+     */
+    public function ajouterMembre(Request $request, Projet $projet)
+    {
+        // 1. Sécurité : Seul le chef de projet peut modifier son équipe
+        if (auth()->id() !== $projet->chef_projet_id && !auth()->user()->hasRole('Admin')) {
+            return response()->json(['error' => 'Non autorisé.'], 403);
+        }
+
+        $validated = $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'pourcentage_participation' => 'required|integer|min:1|max:100',
+            'qualite' => 'required|in:permanent,associe',
+        ]);
+
+        // 2. Vérifier si le membre est déjà dans l'équipe
+        if ($projet->membres()->where('user_id', $validated['user_id'])->exists()) {
+            return response()->json(['error' => 'Ce chercheur fait déjà partie de l\'équipe.'], 422);
+        }
+
+        // 3. Attachement dans la table pivot
+        $projet->membres()->attach($validated['user_id'], [
+            'pourcentage_participation' => $validated['pourcentage_participation'],
+            'qualite' => $validated['qualite']
+        ]);
+
+        return response()->json(['message' => 'Membre ajouté avec succès.']);
+    }
+
+    /**
+     * Retirer un membre de l'équipe.
+     */
+    public function retirerMembre(Projet $projet, $userId)
+    {
+        if (auth()->id() !== $projet->chef_projet_id && !auth()->user()->hasRole('Admin')) {
+            return response()->json(['error' => 'Non autorisé.'], 403);
+        }
+
+        // On ne peut pas retirer le chef de projet de sa propre équipe
+        if ((int)$userId === $projet->chef_projet_id) {
+            return response()->json(['error' => 'Le chef de projet ne peut pas être retiré.'], 422);
+        }
+
+        $projet->membres()->detach($userId);
+
+        return response()->json(['message' => 'Membre retiré de l\'équipe.']);
+    }
 }

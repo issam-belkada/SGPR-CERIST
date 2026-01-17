@@ -11,35 +11,48 @@ class Projet extends Model
 
     protected $fillable = [
         'titre',
-        'nature',        // Recherche, Développement, Exploratoire
-        'type',          // Interne, PNR, Coopération, etc.
+        'nature',           // Recherche, Développement, Autres...
+        'type',             // Interne, PNR, Coopération, etc.
+        'equipe_service',   // Equipe ou Service de rattachement
+        'partenaire',       // Partenaire du projet
         'resume',
         'problematique',
-        'objectifs',
+        'objectifs',        //  Objectifs du projet
         'duree_mois',
-        'date_debut',
-        'date_fin',
-        'statut',        // Proposé, Validé, enCours, Terminé, etc.
-        'chef_projet_id',
-        'division_id'
+        'date_debut',       // Date de démarrage
+        'date_fin',         // Date de fin
+        'statut',
+        'chef_projet_id',   // Chef de projet
+        'division_id'       // Division
     ];
 
-    // --- RELATIONS STRUCTURELLES ---
+    protected $casts = [
+        'date_debut' => 'date',
+        'date_fin' => 'date',
+    ];
 
-    // Le projet appartient à une division (I.1 du canevas)
+    // --- RELATIONS STRUCTURELLES (Section 1 & 2) ---
+
+    /**
+     * Structure de rattachement : Division [cite: 3]
+     */
     public function division()
     {
         return $this->belongsTo(Division::class);
     }
 
-    // Le projet est dirigé par un chercheur (Chef de projet)
+    /**
+     * Identification : Chef de projet [cite: 9]
+     */
     public function chefProjet()
     {
         return $this->belongsTo(User::class, 'chef_projet_id');
     }
 
-    // L'équipe complète (Participants au projet - V.1 du canevas)
-    // Utilise la table pivot 'participation'
+    /**
+     * Participants au projet (Section 2. Participants) 
+     * Inclut : Grade, Qualité, Structure et % de participation [cite: 15, 16, 20, 21]
+     */
     public function membres()
     {
         return $this->belongsToMany(User::class, 'participation')
@@ -47,31 +60,47 @@ class Projet extends Model
                     ->withTimestamps();
     }
 
-    // --- RELATIONS DE PLANIFICATION ---
+    // --- RELATIONS DE RÉSULTATS (Section 4) ---
 
-    // Un projet est divisé en Lots de travail (WP) (V.3 du canevas)
-    public function workPackages()
-    {
-        return $this->hasMany(WorkPackage::class);
-    }
-
-    // Accès direct à toutes les tâches du projet via les WP
-    public function taches()
-    {
-        return $this->hasManyThrough(Tache::class, WorkPackage::class);
-    }
-
-    // --- RELATIONS DE RÉSULTATS ---
-
-    // Les bilans annuels produits pour ce projet
+    /**
+     * Bilans Annuels (Regroupe les résultats par année) [cite: 1]
+     */
     public function bilansAnnuels()
     {
         return $this->hasMany(BilanAnnuel::class);
     }
 
-    // Les fichiers officiels (Rapports déposés à la bibliothèque, etc.)
-    public function livrables()
+    /**
+     * 4.1 Production Scientifique (Livres, publications, etc.) [cite: 24]
+     */
+    public function productionsScientifiques()
     {
-        return $this->hasMany(Livrable::class);
+        return $this->hasMany(ProductionScientifique::class);
+    }
+
+    /**
+     * 4.2 Production Technologique (Produits, logiciels, brevets) [cite: 25]
+     */
+    public function productionsTechnologiques()
+    {
+        return $this->hasMany(ProductionTechnologique::class);
+    }
+
+    /**
+     * 4.3 Formation pour la recherche (PFE, Master, Doctorat) [cite: 35]
+     */
+    public function encadrements()
+    {
+        return $this->hasManyThrough(Encadrement::class, BilanAnnuel::class);
+    }
+
+    // --- LOGIQUE MÉTIER ---
+
+    /**
+     * Calcule l'avancement global basé sur le dernier bilan [cite: 19]
+     */
+    public function getDernierAvancementAttribute()
+    {
+        return $this->bilansAnnuels()->latest()->first()?->avancement_physique ?? 0;
     }
 }

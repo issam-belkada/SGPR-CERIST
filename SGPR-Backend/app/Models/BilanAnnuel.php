@@ -12,11 +12,17 @@ class BilanAnnuel extends Model
     protected $table = 'bilans_annuels'; // Précision car pluriel particulier
 
     protected $fillable = [
-        'projet_id',
-        'annee',
-        'avancement_physique', // Le % d'avancement (Page 1 du bilan)
-        'etat_validation'      // Brouillon, Soumis, Validé_Division, etc.
-    ];
+    'projet_id',
+    'annee',
+    'avancement_physique',
+    'objectifs_realises',
+    'collaborations',
+    'difficultes_scientifiques',
+    'difficultes_materielles',
+    'difficultes_humaines',
+    'autres_resultats',
+    'etat_validation'
+];
 
     // --- RELATIONS ---
 

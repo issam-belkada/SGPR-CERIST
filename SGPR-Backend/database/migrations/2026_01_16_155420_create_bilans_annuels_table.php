@@ -16,6 +16,12 @@ return new class extends Migration
     $table->foreignId('projet_id')->constrained('projets')->onDelete('cascade');
     $table->year('annee');
     $table->float('avancement_physique'); // Estimation %
+    $table->text('objectifs_realises')->nullable();
+    $table->text('collaborations')->nullable();
+    $table->text('difficultes_scientifiques')->nullable();
+    $table->text('difficultes_materielles')->nullable();
+    $table->text('difficultes_humaines')->nullable();
+    $table->text('autres_resultats')->nullable();
     $table->enum('etat_validation', ['Brouillon', 'Soumis', 'Validé_Division', 'Validé_CS', 'Rejeté'])->default('Brouillon');
     $table->timestamps();
 });
