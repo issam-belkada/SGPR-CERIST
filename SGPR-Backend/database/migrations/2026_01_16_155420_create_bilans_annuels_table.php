@@ -22,7 +22,7 @@ return new class extends Migration
     $table->text('difficultes_materielles')->nullable();
     $table->text('difficultes_humaines')->nullable();
     $table->text('autres_resultats')->nullable();
-    $table->enum('etat_validation', ['Brouillon', 'Soumis', 'Validé_Division', 'Validé_CS', 'Rejeté'])->default('Brouillon');
+    $table->enum('etat_validation', ['Brouillon', 'Soumis', 'Validé', 'Rejeté'])->default('Brouillon');
     $table->timestamps();
 });
     }

@@ -54,7 +54,7 @@ class BilanController extends Controller
             return response()->json(['error' => 'Non autorisé'], 403);
         }
 
-        if ($bilan->etat_validation !== 'Brouillon') {
+        if ($bilan->etat_validation !== 'Brouillon' || !$bilan->etat_validation !== 'Rejeté') {
             return response()->json(['error' => 'Ce bilan a déjà été soumis ou validé.'], 400);
         }
 
@@ -90,5 +90,37 @@ class BilanController extends Controller
         ]);
 
         return $pdf->setPaper('a4', 'portrait')->download("Bilan_{$projet->id}.pdf");
+    }
+
+
+    /**
+     * Valider le bilan au niveau de la Division
+     */
+    public function validerDivision(BilanAnnuel $bilan)
+    {
+        // Sécurité : Seul le chef de division du projet peut valider
+        if (auth()->user()->division_id !== $bilan->projet->division_id || !auth()->user()->hasRole('ChefDivision')) {
+            return response()->json(['error' => 'Non autorisé'], 403);
+        }
+    
+        $bilan->update(['etat_validation' => 'Validé']);
+    
+        return response()->json(['message' => 'Bilan validé par la division avec succès.']);
+    }
+
+    /**
+     * Rejeter le bilan pour correction
+     */
+    public function rejeter(Request $request, BilanAnnuel $bilan)
+    {
+        $request->validate(['commentaire' => 'required|string']);
+    
+        // Le bilan repasse en brouillon pour que le chercheur puisse le modifier
+        $bilan->update([
+            'etat_validation' => 'Rejeté',
+            'autres_resultats' => $bilan->autres_resultats . "\n\n[Note de rejet] : " . $request->commentaire 
+        ]);
+    
+        return response()->json(['message' => 'Bilan renvoyé au chercheur pour corrections.']);
     }
 }
