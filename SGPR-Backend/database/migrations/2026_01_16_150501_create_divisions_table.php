@@ -15,6 +15,8 @@ return new class extends Migration
         $table->id();
         $table->string('nom'); // ex: Division Informatique
         $table->string('acronyme'); // ex: DI
+        $table->foreignId('chef_id')->nullable()->constrained('users')->onDelete('set null');
+        $table->text('description')->nullable();
         $table->timestamps();
     });
     }

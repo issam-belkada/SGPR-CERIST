@@ -9,7 +9,7 @@ class Division extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['nom', 'acronyme'];
+    protected $fillable = ['nom', 'acronyme', 'chef_id', 'description'];
 
     // Une division a plusieurs utilisateurs (Chercheurs, Chefs...)
     public function users()
@@ -28,4 +28,8 @@ class Division extends Model
     {
         return $this->hasMany(BilanDivision::class);
     }
+    public function chef()
+{
+    return $this->belongsTo(User::class, 'chef_id');
+}
 }

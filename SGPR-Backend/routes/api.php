@@ -107,6 +107,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/divisions/{division}', [AdminController::class, 'updateDivision']);
     Route::delete('/divisions/{division}', [AdminController::class, 'destroyDivision']);
 
+    Route::get('/admin/statistics', [AdminController::class, 'getStatistics']);
+
 
 
 });
