@@ -25,6 +25,11 @@ class Tache extends Model
         return $this->belongsTo(WorkPackage::class);
     }
 
+    public function livrables()
+    {
+        return $this->hasMany(Livrable::class, 'tache_id');
+    }
+
     // La tâche a un responsable unique (User)
     public function responsable()
     {

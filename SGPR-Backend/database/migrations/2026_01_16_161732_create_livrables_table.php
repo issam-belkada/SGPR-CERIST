@@ -16,7 +16,7 @@ return new class extends Migration
     $table->foreignId('projet_id')->constrained('projets')->onDelete('cascade');
     $table->foreignId('tache_id')->nullable()->constrained('taches')->onDelete('cascade');
     $table->string('titre');
-    $table->enum('type', ['Rapport_Technique', 'Manuel_Utilisateur', 'Code_Source', 'Synthese_Biblio', 'Expertise']);
+    $table->enum('type', ['Rapport_Technique', 'Manuel_Utilisateur', 'Code_Source', 'Synthese_Biblio', 'Expertise',]);
     $table->string('fichier_path'); // Chemin du PDF
     $table->date('date_depot');
     $table->foreignId('depose_par')->constrained('users');

@@ -13,7 +13,10 @@ use App\Http\Controllers\Api\BilanDivisionController;
 use App\Http\Controllers\Api\SessionCsController;
 use App\Http\Controllers\Api\BilanAnnuelCsController;
 use App\Http\Controllers\Api\AdminController;
+use App\Http\Controllers\Api\ChercheurController;
+use App\Http\Controllers\Api\ProjetController as ApiProjetController;
 use App\Http\Controllers\Api\TacheController;
+use App\Http\Controllers\Api\LivrableController;
 
 // Routes Publiques
 Route::post('/login', [AuthController::class, 'login']);
@@ -25,11 +28,15 @@ Route::middleware('auth:sanctum')->group(function () {
     
     Route::apiResource('projets', ProjetController::class);
     Route::get('/chercheur/projets', [ProjetController::class, 'myProjects']);
+    Route::get('/chercheur-stats', [ChercheurController::class, 'getChercheurStats']);
     
     // Transitions du workflow
     Route::patch('/projets/{projet}/valider-division', [ProjetController::class, 'validerParDivision'])->middleware('can:valider-projet-division');
     Route::patch('/projets/{projet}/approuver-cs', [ProjetController::class, 'approuverParCS'])->middleware('can:approuver-projet-cs');
     Route::patch('/projets/{projet}/lancer', [ProjetController::class, 'lancerProjet'])->middleware('can:lancer-projet-approuve');
+    Route::get('/users/search', [ProjetController::class, 'searchUsers']);
+    Route::get('/mes-projets', [ChercheurController::class, 'getMesProjets']);
+    Route::get('/projet-details/{id}', [ChercheurController::class, 'getProjetDetails']);
     
 
     // Gestion de l'équipe
@@ -40,6 +47,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/projets/{projet}/work-packages', [WorkPackageController::class, 'store']);
     Route::post('/work-packages/{wp}/taches', [WorkPackageController::class, 'ajouterTache']);
     Route::get('/mes-taches', [TacheController::class, 'mesTaches']);
+    Route::get('/taches/{id}', [TacheController::class, 'show']);
+    Route::post('/taches/{tache}/update-status', [TacheController::class, 'update']);
+
+    Route::post('/livrables/store-tache', [LivrableController::class, 'storeFromTache']);
+    Route::delete('/livrables/{livrable}', [LivrableController::class, 'destroy']);
+    Route::get('/livrables/{livrable}/download', [LivrableController::class, 'download']);
 
     // Productions Scientifiques & Tech
     Route::get('/bilans/{bilan}/productions-tech', [ProductionTechnologiqueController::class, 'index']);
@@ -103,6 +116,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/users/{user}', [AdminController::class, 'showUser']);
     Route::put('/users/{user}', [AdminController::class, 'updateUser']);
     Route::delete('/users/{user}', [AdminController::class, 'destroyUser']);
+    
 
     // CRUD Divisions
     Route::get('/divisions', [AdminController::class, 'indexDivisions']);
@@ -111,7 +125,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/divisions/{division}', [AdminController::class, 'updateDivision']);
     Route::delete('/divisions/{division}', [AdminController::class, 'destroyDivision']);
     Route::put('/divisions/{division}/assign-chef', [AdminController::class, 'assignChef']);
-    Route::get('/mon-entite-division', [AdminController::class, 'getMaDivision']);
+    Route::get('/mon-entite-division', [ChercheurController::class, 'getMaDivision']);
 
     Route::get('/admin/statistics', [AdminController::class, 'getStatistics']);
 

@@ -7,6 +7,8 @@ use App\Models\Livrable;
 use App\Models\Projet;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Tache;
+use Illuminate\Support\Str;
 
 class LivrableController extends Controller
 {
@@ -46,8 +48,89 @@ class LivrableController extends Controller
         }
     }
 
-    public function download(Livrable $livrable)
-    {
-        return Storage::download($livrable->fichier_path, $livrable->titre);
+
+    public function storeFromTache(Request $request) 
+{
+    // 1. Validation des données
+    $request->validate([
+        'tache_id' => 'required|exists:taches,id',
+        'titre' => 'required|string|max:255',
+        'type' => 'required|in:Rapport_Technique,Manuel_Utilisateur,Code_Source,Synthese_Biblio,Expertise',
+        'fichier' => 'required|file|max:20480', // Max 20Mo
+    ]);
+
+    // 2. Récupération de la tâche et du projet lié
+    $tache = Tache::with('workPackage')->findOrFail($request->tache_id);
+    $projetId = $tache->workPackage->projet_id;
+
+    // 3. Stockage du fichier
+    if ($request->hasFile('fichier')) {
+        $path = $request->file('fichier')->store('livrables/projet_' . $projetId);
+
+        // 4. Création de l'enregistrement
+        $livrable = Livrable::create([
+            'projet_id'   => $projetId,
+            'tache_id'    => $tache->id,
+            'titre'       => $request->titre,
+            'type'        => $request->type,
+            'fichier_path'=> $path,
+            'date_depot'  => now(),
+            'depose_par'  => auth()->id()
+        ]);
+
+        return response()->json($livrable, 201);
     }
+
+    return response()->json(['message' => 'Fichier manquant'], 400);
+}
+
+
+
+
+
+public function destroy(Livrable $livrable)
+{
+    $user = auth()->user();
+    $projet = $livrable->projet;
+
+    // Vérification des droits
+    $isOwner = $livrable->depose_par === $user->id;
+    $isChefProjet = $projet->chef_projet_id === $user->id;
+
+    if (!$isOwner && !$isChefProjet) {
+        return response()->json([
+            'message' => 'Action non autorisée. Seul l\'auteur ou le chef de projet peut supprimer ce fichier.'
+        ], 403);
+    }
+
+    // Suppression physique du fichier
+    if (Storage::exists($livrable->fichier_path)) {
+        Storage::delete($livrable->fichier_path);
+    }
+
+    $livrable->delete();
+
+    return response()->json(['message' => 'Livrable supprimé avec succès']);
+}
+
+
+
+
+
+    public function download(Livrable $livrable)
+{
+    // Debug : Vérifiez si le chemin stocké en base correspond au dossier storage/app/
+    if (!Storage::exists($livrable->fichier_path)) {
+        return response()->json(['error' => 'Fichier introuvable'], 404);
+    }
+
+    // Récupérer l'extension originale du fichier stocké
+    $extension = pathinfo($livrable->fichier_path, PATHINFO_EXTENSION);
+    
+    // Nettoyer le nom du fichier pour éviter les problèmes d'espaces
+    $slugTitre = Str::slug($livrable->titre);
+    $fileName = $slugTitre . '.' . $extension;
+
+    return Storage::download($livrable->fichier_path, $fileName);
+}
 }

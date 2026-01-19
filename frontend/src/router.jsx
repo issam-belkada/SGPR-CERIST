@@ -24,6 +24,9 @@ import MesTaches from "./pages/Chercheur/MesTaches";
 import ProposerProjet from "./pages/Chercheur/ProposerProjet";
 import ProjectDetails from "./pages/Chercheur/ProjectDetails";
 import MaDivision from "./pages/Chercheur/MaDivision";
+import MesProjets from "./pages/Chercheur/MesProjets";
+import TacheDetails from "./pages/Chercheur/TacheDetails";
+import LivrableModal from "./pages/Chercheur/LivrableModal";
 
 const router = createBrowserRouter([
   {
@@ -86,11 +89,13 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <Navigate to="/chercheur/dashboard" replace /> },
       { path: "dashboard", element: <DashboardChercheur /> },
-      { path: "mes-projets", element: <div>Liste de mes projets</div> },
+      { path: "mes-projets", element: <MesProjets/>},
       { path: "projet/:id", element: <ProjectDetails /> },
       { path: "mes-taches", element: <MesTaches /> },
       { path: "proposer-projet", element: <ProposerProjet /> },
       { path: "ma-division", element: <MaDivision /> },
+      { path: 'taches/:id', element: <TacheDetails /> },
+      { path: "taches/:id/ajouter-livrable", element: <LivrableModal /> }
     ],
   },
 

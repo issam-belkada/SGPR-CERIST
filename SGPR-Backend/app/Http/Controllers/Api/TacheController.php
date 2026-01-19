@@ -30,30 +30,50 @@ class TacheController extends Controller
         return response()->json($tache, 201);
     }
 
-    // Mettre à jour l'état ou les infos d'une tâche
-    public function update(Request $request, Tache $tache)
+
+    public function show($id)
     {
-        $user = auth()->user();
-        $isChef = $user->id === $tache->workPackage->projet->chef_projet_id;
-        $isResponsable = $user->id === $tache->responsable_id;
+        // On récupère la tâche avec le WP, le projet et les livrables déjà déposés
+        $tache = Tache::with(['workPackage.projet', 'livrables.depositaire','responsable','livrables'])
+                      ->find($id);
 
-        if (!$isChef && !$isResponsable) {
-            return response()->json(['error' => 'Vous n\'avez pas le droit de modifier cette tâche'], 403);
+        if (!$tache) {
+            return response()->json(['message' => 'Tâche non trouvée'], 404);
         }
-
-        $rules = $isChef ? [
-            'nom' => 'string',
-            'etat' => 'in:A faire,En cours,Terminé',
-            'responsable_id' => 'exists:users,id'
-        ] : [
-            'etat' => 'required|in:A faire,En cours,Terminé'
-        ];
-
-        $validated = $request->validate($rules);
-        $tache->update($validated);
 
         return response()->json($tache);
     }
+
+    // Mettre à jour l'état ou les infos d'une tâche
+    public function update(Request $request, Tache $tache)
+{
+    $user = auth()->user();
+    // On vérifie si l'utilisateur est responsable de la tâche ou chef de projet
+    if ($user->id !== $tache->responsable_id && $user->id !== $tache->workPackage->projet->chef_projet_id) {
+        return response()->json(['error' => 'Non autorisé'], 403);
+    }
+
+    $validated = $request->validate([
+        'etat' => 'required|in:En attente,En cours,Terminé,A faire',
+        'livrable_titre' => 'nullable|string|max:255'
+    ]);
+
+    $tache->update(['etat' => $request->etat]);
+
+    // Si un titre de livrable est fourni, on le crée
+    if ($request->filled('livrable_titre')) {
+        $tache->livrables()->create([
+            'titre' => $request->livrable_titre,
+            'projet_id' => $tache->workPackage->projet_id,
+            'chercheur_id' => $user->id,
+            'date_depot' => now(),
+            'type' => 'Document de travail',
+            'chemin_fichier' => 'draft'
+        ]);
+    }
+
+    return response()->json($tache->load('livrables'));
+}
 
     public function mesTaches()
 {

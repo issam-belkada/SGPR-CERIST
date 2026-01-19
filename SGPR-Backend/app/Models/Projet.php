@@ -55,7 +55,7 @@ class Projet extends Model
      */
     public function membres()
     {
-        return $this->belongsToMany(User::class, 'participation')
+        return $this->belongsToMany(User::class, 'participation', 'projet_id', 'user_id')
                     ->withPivot('pourcentage_participation', 'qualite')
                     ->withTimestamps();
     }
@@ -103,4 +103,10 @@ class Projet extends Model
     {
         return $this->bilansAnnuels()->latest()->first()?->avancement_physique ?? 0;
     }
+
+
+    public function workPackages()
+{
+    return $this->hasMany(WorkPackage::class);
+}
 }
