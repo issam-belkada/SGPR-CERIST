@@ -18,8 +18,14 @@ import DivisionList from "./pages/Admin/DivisionList";
 import DivisionForm from "./pages/Admin/DivisionForm";
 import DivisionDetails from "./pages/Admin/DivisionDetails";
 
-const router = createBrowserRouter([
+// Pages Chercheur
+import DashboardChercheur from "./pages/Chercheur/DashboardChercheur";
+import MesTaches from "./pages/Chercheur/MesTaches";
+import ProposerProjet from "./pages/Chercheur/ProposerProjet";
+import ProjectDetails from "./pages/Chercheur/ProjectDetails";
+import MaDivision from "./pages/Chercheur/MaDivision";
 
+const router = createBrowserRouter([
   {
     path: "/",
     element: <GuestLayout />,
@@ -29,28 +35,22 @@ const router = createBrowserRouter([
     ],
   },
 
-
   {
     path: "/admin",
     element: <AdminLayout />,
     children: [
       { index: true, element: <Navigate to="/admin/dashboard" replace /> },
       { path: "dashboard", element: <AdminDashboard /> },
-      
-      // Gestion des Utilisateurs
       { path: "users", element: <UserList /> },
       { path: "users/create", element: <UserForm /> },
       { path: "users/:id", element: <UserDetails /> },
       { path: "users/:id/edit", element: <UserForm /> },
-      
-      // Gestion des Divisions
       { path: "divisions", element: <DivisionList /> },
       { path: "divisions/create", element: <DivisionForm /> },
       { path: "divisions/:id", element: <DivisionDetails /> },
       { path: "divisions/:id/edit", element: <DivisionForm /> },
     ],
   },
-
 
   {
     path: "/cs",
@@ -62,7 +62,6 @@ const router = createBrowserRouter([
     ],
   },
 
-
   {
     path: "/division",
     element: <ChefDivisionLayout />,
@@ -71,7 +70,6 @@ const router = createBrowserRouter([
       { path: "propositions", element: <div>Propositions de la Division</div> },
     ],
   },
-
 
   {
     path: "/chef-projet",
@@ -82,25 +80,38 @@ const router = createBrowserRouter([
     ],
   },
 
-
   {
     path: "/chercheur",
     element: <ChercheurLayout />,
     children: [
-      { index: true, element: <Navigate to="/chercheur/mes-projets" replace /> },
-      { path: "mes-projets", element: <div>Mes Projets de Recherche</div> },
-      { path: "proposer-projet", element: <div>Nouveau Projet</div> },
+      { index: true, element: <Navigate to="/chercheur/dashboard" replace /> },
+      { path: "dashboard", element: <DashboardChercheur /> },
+      { path: "mes-projets", element: <div>Liste de mes projets</div> },
+      { path: "projet/:id", element: <ProjectDetails /> },
+      { path: "mes-taches", element: <MesTaches /> },
+      { path: "proposer-projet", element: <ProposerProjet /> },
+      { path: "ma-division", element: <MaDivision /> },
     ],
   },
-    
-  
-    {
-    path: "/unauthorized", 
-    element: <div className="h-screen flex items-center justify-center font-bold text-red-600 uppercase tracking-widest">Accès non autorisé</div> 
+
+  {
+    path: "/unauthorized",
+    element: (
+      <div className="h-screen flex flex-col items-center justify-center bg-slate-50">
+        <div className="text-red-600 font-black text-5xl mb-4">403</div>
+        <div className="font-bold text-slate-800 uppercase tracking-widest">Accès non autorisé</div>
+      </div>
+    ),
   },
-  { 
-    path: "*", 
-    element: <div className="h-screen flex items-center justify-center font-bold">404 - Page introuvable</div> 
+
+  {
+    path: "*",
+    element: (
+      <div className="h-screen flex flex-col items-center justify-center bg-slate-50">
+        <div className="text-slate-300 font-black text-5xl mb-4">404</div>
+        <div className="font-bold text-slate-800 tracking-tight">Page introuvable</div>
+      </div>
+    ),
   },
 ]);
 

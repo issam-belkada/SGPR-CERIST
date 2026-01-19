@@ -20,13 +20,13 @@ class ProjetController extends Controller
         // 1. Admin ou Chef CS voient tous les projets du centre
         if ($user->hasRole(['Admin', 'ChefCS'])) {
             $projets = Projet::with(['chefProjet', 'division'])->get();
-        } 
+        }
         // 2. Le Chef de Division voit les projets de sa division uniquement
         elseif ($user->hasRole('ChefDivision')) {
             $projets = Projet::where('division_id', $user->division_id)
                 ->with(['chefProjet'])
                 ->get();
-        } 
+        }
         // 3. Le Chercheur/Chef de Projet voit ses propres projets (supervisés ou membre)
         else {
             $projets = Projet::where('chef_projet_id', $user->id)

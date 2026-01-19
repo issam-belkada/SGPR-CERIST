@@ -54,4 +54,13 @@ class TacheController extends Controller
 
         return response()->json($tache);
     }
+
+    public function mesTaches()
+{
+    // Récupère les tâches assignées à l'utilisateur avec les infos du projet
+    return Tache::where('responsable_id', auth()->id())
+        ->with(['workPackage.projet'])
+        ->orderBy('date_fin', 'asc')
+        ->get();
+}
 }

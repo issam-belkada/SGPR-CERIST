@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { 
-  Send, FileText, Users, Calendar, 
-  Info, Upload, CheckCircle2, AlertCircle 
+  Send, FileText, Users, Calendar,
+  Info, Upload, CheckCircle2, AlertCircle
 } from "lucide-react";
 
 export default function ProposerProjet() {

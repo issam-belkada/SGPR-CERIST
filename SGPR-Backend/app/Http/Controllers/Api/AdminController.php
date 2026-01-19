@@ -132,6 +132,29 @@ class AdminController extends Controller
     return response()->json($division->load(['users.roles', 'chef']));
 }
 
+
+   public function getMaDivision(Request $request) 
+{
+    $user = $request->user();
+
+    if (!$user->division_id) {
+        return response()->json(['message' => 'Aucune division associée à votre compte.'], 404);
+    }
+
+    // Changement de 'membres' vers 'users' (le nom dans votre modèle)
+    $division = Division::with(['users' => function($query) {
+                    $query->orderBy('nom', 'asc');
+                }, 'chef'])
+                ->where('id', $user->division_id) 
+                ->first();
+
+    if (!$division) {
+        return response()->json(['message' => 'Division introuvable'], 404);
+    }
+
+    return response()->json($division);
+}
+
     public function updateDivision(Request $request, Division $division)
     {
         $validated = $request->validate([

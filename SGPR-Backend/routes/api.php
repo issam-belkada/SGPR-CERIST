@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\BilanDivisionController;
 use App\Http\Controllers\Api\SessionCsController;
 use App\Http\Controllers\Api\BilanAnnuelCsController;
 use App\Http\Controllers\Api\AdminController;
+use App\Http\Controllers\Api\TacheController;
 
 // Routes Publiques
 Route::post('/login', [AuthController::class, 'login']);
@@ -29,6 +30,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/projets/{projet}/valider-division', [ProjetController::class, 'validerParDivision'])->middleware('can:valider-projet-division');
     Route::patch('/projets/{projet}/approuver-cs', [ProjetController::class, 'approuverParCS'])->middleware('can:approuver-projet-cs');
     Route::patch('/projets/{projet}/lancer', [ProjetController::class, 'lancerProjet'])->middleware('can:lancer-projet-approuve');
+    
 
     // Gestion de l'équipe
     Route::post('/projets/{projet}/membres', [ProjetController::class, 'ajouterMembre']);
@@ -37,6 +39,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Planification WP et Tâches
     Route::post('/projets/{projet}/work-packages', [WorkPackageController::class, 'store']);
     Route::post('/work-packages/{wp}/taches', [WorkPackageController::class, 'ajouterTache']);
+    Route::get('/mes-taches', [TacheController::class, 'mesTaches']);
 
     // Productions Scientifiques & Tech
     Route::get('/bilans/{bilan}/productions-tech', [ProductionTechnologiqueController::class, 'index']);
@@ -108,6 +111,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/divisions/{division}', [AdminController::class, 'updateDivision']);
     Route::delete('/divisions/{division}', [AdminController::class, 'destroyDivision']);
     Route::put('/divisions/{division}/assign-chef', [AdminController::class, 'assignChef']);
+    Route::get('/mon-entite-division', [AdminController::class, 'getMaDivision']);
 
     Route::get('/admin/statistics', [AdminController::class, 'getStatistics']);
 
