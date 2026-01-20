@@ -132,7 +132,7 @@ class ChercheurController extends Controller
     $prochainesEcheances = \App\Models\Tache::where('responsable_id', $user->id)
         ->where('etat', '!=', 'Terminé')
         ->with('workPackage.projet')
-        ->orderBy('date_fin', 'asc')
+        ->orderBy('updated_at', 'asc')
         ->take(3)
         ->get();
 

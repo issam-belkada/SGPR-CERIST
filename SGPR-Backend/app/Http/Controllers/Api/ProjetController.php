@@ -191,28 +191,29 @@ class ProjetController extends Controller
     }
 
     public function ajouterMembre(Request $request, Projet $projet)
-    {
-        if (auth()->id() !== $projet->chef_projet_id && !auth()->user()->hasRole('Admin')) {
-            return response()->json(['error' => 'Non autorisé.'], 403);
-        }
-
-        $validated = $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'pourcentage_participation' => 'required|integer|min:1|max:100',
-            'qualite' => 'required|in:permanent,associe',
-        ]);
-
-        if ($projet->membres()->where('user_id', $validated['user_id'])->exists()) {
-            return response()->json(['error' => 'Déjà membre.'], 422);
-        }
-
-        $projet->membres()->attach($validated['user_id'], [
-            'pourcentage_participation' => $validated['pourcentage_participation'],
-            'qualite' => $validated['qualite']
-        ]);
-
-        return response()->json(['message' => 'Membre ajouté.']);
+{
+    if (auth()->id() !== $projet->chef_projet_id && !auth()->user()->hasRole('Admin')) {
+        return response()->json(['error' => 'Non autorisé.'], 403);
     }
+
+    $validated = $request->validate([
+        'user_id' => 'required|exists:users,id',
+        // On rend ces champs optionnels ici pour la modale simplifiée
+        'pourcentage_participation' => 'nullable|integer|min:1|max:100',
+        'qualite' => 'nullable|in:permanent,associe',
+    ]);
+
+    if ($projet->membres()->where('user_id', $validated['user_id'])->exists()) {
+        return response()->json(['error' => 'Déjà membre.'], 422);
+    }
+
+    $projet->membres()->attach($validated['user_id'], [
+        'pourcentage_participation' => $validated['pourcentage_participation'] ?? 20, // 20% par défaut
+        'qualite' => $validated['qualite'] ?? 'permanent'
+    ]);
+
+    return response()->json(['message' => 'Membre ajouté avec succès.']);
+}
 
     public function retirerMembre(Projet $projet, $userId)
     {

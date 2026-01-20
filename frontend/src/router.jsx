@@ -5,7 +5,6 @@ import GuestLayout from "./layouts/GuestLayout";
 import AdminLayout from "./layouts/AdminLayout";
 import CSLayout from "./layouts/CSLayout";
 import ChefDivisionLayout from "./layouts/ChefDivisionLayout";
-import ChefProjetLayout from "./layouts/ChefProjetLayout";
 import ChercheurLayout from "./layouts/ChercheurLayout";
 
 // Pages
@@ -27,6 +26,7 @@ import MaDivision from "./pages/Chercheur/MaDivision";
 import MesProjets from "./pages/Chercheur/MesProjets";
 import TacheDetails from "./pages/Chercheur/TacheDetails";
 import LivrableModal from "./pages/Chercheur/LivrableModal";
+import BilanPage from "./pages/Chercheur/BilanPage";
 
 const router = createBrowserRouter([
   {
@@ -75,15 +75,6 @@ const router = createBrowserRouter([
   },
 
   {
-    path: "/chef-projet",
-    element: <ChefProjetLayout />,
-    children: [
-      { index: true, element: <Navigate to="/chef-projet/pilotage" replace /> },
-      { path: "pilotage", element: <div>Pilotage des Projets</div> },
-    ],
-  },
-
-  {
     path: "/chercheur",
     element: <ChercheurLayout />,
     children: [
@@ -95,7 +86,8 @@ const router = createBrowserRouter([
       { path: "proposer-projet", element: <ProposerProjet /> },
       { path: "ma-division", element: <MaDivision /> },
       { path: 'taches/:id', element: <TacheDetails /> },
-      { path: "taches/:id/ajouter-livrable", element: <LivrableModal /> }
+        { path: "taches/:id/ajouter-livrable", element: <LivrableModal /> },
+        { path: "projet/:id/bilan" , element: <BilanPage/> },
     ],
   },
 

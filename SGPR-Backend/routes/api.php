@@ -46,9 +46,11 @@ Route::middleware('auth:sanctum')->group(function () {
     // Planification WP et Tâches
     Route::post('/projets/{projet}/work-packages', [WorkPackageController::class, 'store']);
     Route::post('/work-packages/{wp}/taches', [WorkPackageController::class, 'ajouterTache']);
+    Route::post('/taches', [TacheController::class, 'store']);
     Route::get('/mes-taches', [TacheController::class, 'mesTaches']);
     Route::get('/taches/{id}', [TacheController::class, 'show']);
     Route::post('/taches/{tache}/update-status', [TacheController::class, 'updateStatus']);
+    Route::delete('/taches/{id}', [TacheController::class, 'destroy']);
 
     Route::post('/livrables/store-tache', [LivrableController::class, 'storeFromTache']);
     Route::delete('/livrables/{livrable}', [LivrableController::class, 'destroy']);

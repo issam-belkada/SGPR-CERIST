@@ -13,7 +13,7 @@ class Livrable extends Model
         'projet_id',
         'tache_id',
         'titre',
-        'type', // Rapport_Technique, Code_Source, Manuel...
+        'type',
         'fichier_path',
         'date_depot',
         'depose_par'

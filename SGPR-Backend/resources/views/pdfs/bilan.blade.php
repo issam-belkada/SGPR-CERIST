@@ -1,135 +1,207 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html>
+
 <head>
-    <meta charset="UTF-8">
+    <meta charset="utf-8">
+    <title>Bilan Annuel - {{ $annee }}</title>
     <style>
-        @page { margin: 1.5cm; }
-        body { font-family: 'DejaVu Sans', sans-serif; font-size: 11px; color: #000; line-height: 1.4; }
-        .title-box { text-align: center; border: 2px solid #000; padding: 10px; margin-bottom: 20px; font-weight: bold; font-size: 14px; background: #f9f9f9; }
-        .section-header { background: #e0e0e0; border: 1px solid #000; padding: 5px; font-weight: bold; margin-top: 15px; text-transform: uppercase; }
-        .content-block { border: 1px solid #000; border-top: none; padding: 10px; min-height: 40px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 5px; }
-        th, td { border: 1px solid #000; padding: 6px; text-align: left; }
-        th { background: #f2f2f2; font-weight: bold; }
-        .label { font-weight: bold; color: #333; }
-        ul { margin: 5px 0; padding-left: 20px; }
-        li { margin-bottom: 3px; }
+        body {
+            font-family: sans-serif;
+            font-size: 11pt;
+            line-height: 1.4;
+            color: #333;
+        }
+
+        .header {
+            text-align: center;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #000;
+            padding-bottom: 10px;
+        }
+
+        .section-title {
+            background-color: #f2f2f2;
+            padding: 5px;
+            font-weight: bold;
+            border: 1px solid #ccc;
+            margin-top: 15px;
+            text-transform: uppercase;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th,
+        td {
+            border: 1px solid #999;
+            padding: 6px;
+            text-align: left;
+            font-size: 10pt;
+        }
+
+        th {
+            background-color: #e9e9e9;
+        }
+
+        .field-label {
+            font-weight: bold;
+            width: 30%;
+        }
+
+        .progression {
+            font-size: 14pt;
+            color: #d32f2f;
+            font-weight: bold;
+            text-align: center;
+            margin: 15px 0;
+            border: 2px dashed #d32f2f;
+            padding: 10px;
+        }
     </style>
 </head>
+
 <body>
 
-    <div class="title-box">
+    <div class="header">
         BILAN PROJET : {{ $projet->titre }} (Année : {{ $annee }}) [cite: 1]
     </div>
 
-    <div class="section-header">1. STRUCTURE DE RATTACHEMENT [cite: 2]</div>
-    <div class="content-block">
-        <p><span class="label">Division / Département / Plateforme :</span> {{ $projet->division->nom }} [cite: 3]</p>
-        <p><span class="label">Equipe ou Service :</span> {{ $projet->equipe_service ?? 'Non précisé' }} [cite: 4]</p>
+    <div class="section-title">1. STRUCTURE DE RATTACHEMENT [cite: 2]</div>
+    <table>
+        <tr>
+            <td class="field-label">Division / Département :</td>
+            <td>{{ $projet->division->nom ?? 'N/A' }} [cite: 3]</td>
+        </tr>
+        <tr>
+            <td class="field-label">Equipe ou Service :</td>
+            <td>{{ $projet->equipe_service ?? 'N/A' }} [cite: 4]</td>
+        </tr>
+    </table>
+
+    <div class="section-title">2. IDENTIFICATION DU PROJET [cite: 5]</div>
+    <table>
+        <tr>
+            <td class="field-label">Type du projet :</td>
+            <td>{{ $projet->nature }} [cite: 6, 7]</td>
+        </tr>
+        <tr>
+            <td class="field-label">Intitulé :</td>
+            <td>{{ $projet->titre }} [cite: 8]</td>
+        </tr>
+        <tr>
+            <td class="field-label">Chef de projet :</td>
+            <td>{{ $projet->chefProjet->nom }} {{ $projet->chefProjet->prenom }} [cite: 9]</td>
+        </tr>
+        <tr>
+            <td class="field-label">Dates (Début - Fin) :</td>
+            <td>Du {{ $projet->date_debut->format('d/m/Y') }} au {{ $projet->date_fin->format('d/m/Y') }} [cite: 10, 11]
+            </td>
+        </tr>
+    </table>
+
+    <div class="progression">
+        ESTIMATION DE L'ÉTAT D'AVANCEMENT DU PROJET : {{ $bilan->avancement_physique }}%
     </div>
 
-    <div class="section-header">2. IDENTIFICATION DU PROJET [cite: 5]</div>
-    <div class="content-block">
-        <p><span class="label">Type du projet ({{ $projet->nature }}) :</span> {{ $projet->type }} [cite: 6, 7]</p>
-        <p><span class="label">Intitulé :</span> {{ $projet->titre }} [cite: 8]</p>
-        <p><span class="label">Chef de projet :</span> {{ $projet->chefProjet->nom }} {{ $projet->chefProjet->prenom }} [cite: 9]</p>
-        <p><span class="label">Dates :</span> Du {{ $projet->date_debut->format('d/m/Y') }} au {{ $projet->date_fin->format('d/m/Y') }} [cite: 10, 11]</p>
-        <p><span class="label">Partenaire :</span> {{ $projet->partenaire ?? 'Néant' }} [cite: 12]</p>
-        
-        <p class="label" style="margin-top:10px;">Participants au projet : [cite: 13]</p>
-        <table>
-            <thead>
-                <tr>
-                    <th>NOM et Prénom [cite: 14]</th>
-                    <th>Grade [cite: 15, 17]</th>
-                    <th>Qualité [cite: 16]</th>
-                    <th>Structure [cite: 20]</th>
-                    <th>% Part. [cite: 21]</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($projet->membres as $m)
-                <tr>
-                    <td>{{ $m->nom }} {{ $m->prenom }}</td>
-                    <td>{{ $m->grade }}</td>
-                    <td>{{ $m->pivot->qualite }}</td>
-                    <td>{{ $m->division->acronyme ?? 'CERIST' }}</td>
-                    <td>{{ $m->pivot->pourcentage_participation }}%</td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
-        <p style="margin-top:10px;"><span class="label">Estimation de l'état d'avancement global :</span> {{ $bilan->avancement_physique }}% </p>
-    </div>
-
-    <div class="section-header">3. OBJECTIFS DU PROJET </div>
-    <div class="content-block">
-        <strong>Objectifs initiaux :</strong><br>
-        {{ $projet->objectifs }}<br><br>
-        <strong>Réalisations de l'année :</strong><br>
-        {{ $bilan->objectifs_realises }}
-    </div>
-
-    <div class="section-header">4. RÉSULTATS QUANTIFIÉS [cite: 23]</div>
-    <div style="padding: 10px; border: 1px solid #000; border-top: none;">
-        
-        <p class="label">4.1 PRODUCTION SCIENTIFIQUE (Livres, Publications, etc.) : [cite: 24]</p>
-        <ul>
-            @forelse($productionsSci as $ps)
-                <li>[{{ $ps->type }}] {{ $ps->titre }} - <em>{{ $ps->revue_conference }}</em> ({{ $ps->annee }})</li>
-            @empty
-                <li>Néant</li>
-            @endforelse
-        </ul>
-
-        <p class="label">4.2 PRODUCTION TECHNOLOGIQUE (Logiciels, Brevets, etc.) : [cite: 25]</p>
-        <ul>
-            @forelse($productionsTech as $pt)
-                <li><strong>{{ $pt->type }} :</strong> {{ $pt->intitule }} - {{ $pt->description }}</li>
-            @empty
-                <li>Néant</li>
-            @endforelse
-        </ul>
-
-        <p class="label">4.3 FORMATION POUR LA RECHERCHE (Encadrements) : [cite: 35]</p>
-        <ul>
-            @forelse($encadrements as $e)
-                <li><strong>{{ $e->type_diplome }} :</strong> {{ $e->nom_etudiant }} - Sujet : {{ $e->sujet }} ({{ $e->etat_avancement }})</li>
-            @empty
-                <li>Néant</li>
-            @endforelse
-        </ul>
-
-        <p class="label">4.4 AUTRES : </p>
-        <p>{{ $bilan->autres_resultats ?? 'Néant' }}</p>
-    </div>
-
-    <div class="section-header">5. COLLABORATION [cite: 48]</div>
-    <div class="content-block">
-        {{ $bilan->collaborations ?? 'Néant' }} [cite: 48]
-    </div>
-
-    <div class="section-header">6. DIFFICULTÉS RENCONTRÉES [cite: 51]</div>
-    <div class="content-block">
-        <p><span class="label">6.1 Sur le plan scientifique :</span><br> {{ $bilan->diff_scientifiques ?? 'Néant' }} [cite: 52]</p>
-        <p><span class="label">6.2 Sur le plan matériel :</span><br> {{ $bilan->diff_materielles ?? 'Néant' }} [cite: 55]</p>
-        <p><span class="label">6.3 Ressource Humaine :</span><br> {{ $bilan->diff_humaines ?? 'Néant' }} [cite: 58]</p>
-    </div>
-
-    <div style="margin-top: 30px;">
-        <table style="border: none;">
+    <div class="section-title">Participants au projet [cite: 13]</div>
+    <table>
+        <thead>
             <tr>
-                <td style="border: none; width: 50%; text-align: center;">
-                    <strong>Signature du Chef de Projet</strong><br><br><br><br>
-                    ..........................................
-                </td>
-                <td style="border: none; width: 50%; text-align: center;">
-                    <strong>Visa du Chef de Division</strong><br><br><br><br>
-                    ..........................................
-                </td>
+                <th>NOM et Prénom [cite: 14]</th>
+                <th>Grade [cite: 15]</th>
+                <th>Qualité [cite: 16]</th>
+                <th>% Participation [cite: 21]</th>
             </tr>
-        </table>
+        </thead>
+        <tbody>
+            @foreach($projet->membres as $membre)
+                <tr>
+                    <td>{{ $membre->nom }} {{ $membre->prenom }}</td>
+                    <td>{{ $membre->grade ?? 'N/A' }}</td>
+                    <td>{{ $membre->pivot->qualite ?? 'Membre' }}</td>
+                    <td>{{ $membre->pivot->pourcentage_participation ?? 0 }}%</td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
+
+    <div class="section-title">3. OBJECTIFS DU PROJET [cite: 22]</div>
+    <div style="padding: 10px; border: 1px solid #ccc; min-height: 50px;">
+        {{ $bilan->objectifs_realises ?? 'Aucun objectif spécifié pour cette période.' }}
     </div>
+
+    <div class="section-title">4. RÉSULTATS QUANTIFIÉS [cite: 23]</div>
+
+    <h3>4.1 Production Scientifique [cite: 24]</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Type</th>
+                <th>Titre / Revue</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse($productionsSci as $sci)
+                <tr>
+                    <td>{{ str_replace('_', ' ', $sci->type) }}</td>
+                    <td><strong>{{ $sci->titre }}</strong><br>{{ $sci->revue_ou_conference }}</td>
+                    <td>{{ \Carbon\Carbon::parse($sci->date_parution)->format('m/Y') }}</td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="3">Aucune production scientifique enregistrée.</td>
+                </tr>
+            @endforelse
+        </tbody>
+    </table>
+
+    <h3>4.2 Production Technologique [cite: 25]</h3>
+    <ul>
+        @forelse($productionsTech as $tech)
+            <li><strong>{{ $tech->type }} :</strong> {{ $tech->intitule }} (Ref: {{ $tech->reference ?? 'N/A' }}) [cite: 26,
+                29, 32]</li>
+        @empty
+            <li>Néant</li>
+        @endforelse
+    </ul>
+
+    <h3>4.3 Formation pour la Recherche [cite: 35]</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Étudiant [cite: 36, 40, 43]</th>
+                <th>Diplôme [cite: 39, 42]</th>
+                <th>Sujet [cite: 43]</th>
+                <th>État</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse($encadrements as $enc)
+                <tr>
+                    <td>{{ $enc->nom_etudiant }}</td>
+                    <td>{{ $enc->type_diplome }}</td>
+                    <td>{{ $enc->sujet }}</td>
+                    <td>{{ $enc->etat_avancement }}</td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="4">Aucun encadrement enregistré.</td>
+                </tr>
+            @endforelse
+        </tbody>
+    </table>
+
+    <div class="section-title">6. DIFFICULTÉS RENCONTRÉES [cite: 51]</div>
+    <p><strong>6.1 Plan scientifique :</strong> {{ $bilan->diff_scientifiques ?? 'Néant' }} [cite: 52]</p>
+    <p><strong>6.2 Plan matériel :</strong> {{ $bilan->diff_materielles ?? 'Néant' }} [cite: 55]</p>
+    <p><strong>6.3 Ressource humaine :</strong> {{ $bilan->diff_humaines ?? 'Néant' }} [cite: 58]</p>
 
 </body>
+
 </html>

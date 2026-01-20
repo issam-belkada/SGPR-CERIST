@@ -16,7 +16,7 @@ export default function DashboardChercheur() {
       try {
         // En production, vous pouvez créer une route API unique /chercheur-stats
         const resStats = await axiosClient.get("/chercheur-stats");
-        const resTasks = await axiosClient.get("/mes-taches?limit=5");
+        const resTasks = await axiosClient.get("/mes-taches");
         setStats(resStats.data);
         setRecentTasks(resTasks.data);
       } catch (err) {

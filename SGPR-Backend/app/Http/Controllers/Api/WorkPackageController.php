@@ -16,20 +16,21 @@ class WorkPackageController extends Controller
     }
 
     // Créer un WP (Chef de projet uniquement)
-    public function store(Request $request, Projet $projet)
+    public function store(Request $request)
     {
-        if (auth()->id() !== $projet->chef_projet_id) {
-            return response()->json(['error' => 'Seul le chef de projet peut créer des WP'], 403);
-        }
-
         $validated = $request->validate([
-            'code_wp' => 'required|string|max:10',
+            'projet_id' => 'required|exists:projets,id',
+            'code_wp' => 'required|string',
             'titre' => 'required|string|max:255',
-            'objectifs' => 'nullable|string',
+            'objectifs' => 'required|string', // Bien inclus ici
         ]);
 
-        $wp = $projet->workPackages()->create($validated);
-        return response()->json($wp, 201);
+        $wp = WorkPackage::create($validated);
+
+        return response()->json([
+            'message' => 'Work Package créé avec succès',
+            'wp' => $wp
+        ], 201);
     }
 
     public function destroy(WorkPackage $workPackage)

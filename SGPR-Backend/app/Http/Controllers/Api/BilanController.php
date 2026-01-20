@@ -6,42 +6,61 @@ use App\Http\Controllers\Controller;
 use App\Models\BilanAnnuel;
 use App\Models\Projet;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class BilanController extends Controller
 {
     
     public function storeOuUpdate(Request $request, Projet $projet)
-    {
-        if (auth()->id() !== $projet->chef_projet_id) {
-            return response()->json(['error' => 'Non autorisé'], 403);
-        }
+{
+    if (auth()->id() !== $projet->chef_projet_id) {
+        return response()->json(['error' => 'Non autorisé'], 403);
+    }
 
-        $validated = $request->validate([
-            'annee' => 'required|integer',
-            'avancement_physique' => 'nullable|numeric|min:0|max:100',
-            'objectifs_realises' => 'nullable|string',
-            'collaborations' => 'nullable|string',
-            'diff_scientifiques' => 'nullable|string',
-            'diff_materielles' => 'nullable|string',
-            'diff_humaines' => 'nullable|string',
-            'autres_resultats' => 'nullable|string',
-        ]);
+    $validated = $request->validate([
+        'annee' => 'required|integer',
+        'avancement_physique' => 'nullable|numeric|min:0|max:100',
+        'objectifs_realises' => 'nullable|string',
+        'collaborations' => 'nullable|string',
+        'diff_scientifiques' => 'nullable|string',
+        'diff_materielles' => 'nullable|string',
+        'diff_humaines' => 'nullable|string',
+        'autres_resultats' => 'nullable|string',
+        // Ajout des validations pour les relations
+        'productions_sci' => 'array',
+        'productions_tech' => 'array',
+        'encadrements' => 'array',
+    ]);
 
-        // On utilise updateOrCreate : si le bilan pour cette année existe, on le met à jour
+    return DB::transaction(function () use ($projet, $validated) {
+        // 1. Mise à jour ou création du bilan (Sections 3, 5, 6)
         $bilan = BilanAnnuel::updateOrCreate(
             ['projet_id' => $projet->id, 'annee' => $validated['annee']],
-            array_merge($validated, [
-                // On s'assure que l'état ne change pas lors d'une simple mise à jour
-                'etat_validation' => 'Brouillon'
-            ])
+            array_merge($validated, ['etat_validation' => 'Brouillon'])
         );
 
-        return response()->json([
-            'message' => 'Brouillon enregistré avec succès',
-            'bilan' => $bilan
-        ], 200);
-    }
+        // 2. Mise à jour des productions (Section 4)
+        // On synchronise les données en supprimant les anciennes pour cette année/bilan
+        if (isset($validated['productions_sci'])) {
+            $bilan->productionsScientifiques()->delete();
+            $bilan->productionsScientifiques()->createMany($validated['productions_sci']);
+        }
+
+        if (isset($validated['productions_tech'])) {
+            $bilan->productionsTechnologiques()->delete();
+            $bilan->productionsTechnologiques()->createMany($validated['productions_tech']);
+        }
+
+        if (isset($validated['encadrements'])) {
+            $bilan->encadrements()->delete();
+            $bilan->encadrements()->createMany($validated['encadrements']);
+        }
+
+        return response()->json(['message' => 'Bilan et résultats enregistrés', 'bilan' => $bilan->load(['productionsScientifiques', 'productionsTechnologiques', 'encadrements'])]);
+    });
+}
 
     /**
      * Soumettre définitivement le bilan.
@@ -81,13 +100,13 @@ class BilanController extends Controller
         $encadrements = $bilan->encadrements;
 
         $pdf = Pdf::loadView('pdfs.bilan', [
-            'bilan' => $bilan,
-            'projet' => $projet,
-            'annee' => $bilan->annee,
-            'productionsSci' => $productionsSci,
-            'productionsTech' => $productionsTech,
-            'encadrements' => $encadrements
-        ]);
+        'bilan' => $bilan,
+        'projet' => $projet,
+        'annee' => $bilan->annee,
+        'productionsSci' => $productionsSci,
+        'productionsTech' => $productionsTech,
+        'encadrements' => $encadrements
+]);
 
         return $pdf->setPaper('a4', 'portrait')->download("Bilan_{$projet->id}.pdf");
     }

@@ -6,58 +6,58 @@ use App\Http\Controllers\Controller;
 use App\Models\Tache;
 use App\Models\WorkPackage;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class TacheController extends Controller
 {
     // Créer une tâche dans un WP
     public function store(Request $request)
-{
-    $validated = $request->validate([
-        'nom' => 'required|string|max:255',
-        'description' => 'nullable|string',
-        'date_debut' => 'required|date',
-        'date_fin' => 'required|date|after_or_equal:date_debut',
-        'responsable_id' => 'required|exists:users,id',
-        'work_package_id' => 'required|exists:work_packages,id',
-        'livrables' => 'nullable|array',
-        'livrables.*.titre' => 'required|string|max:255',
-        'livrables.*.type' => 'required|string',
-    ]);
+    {
+        $validated = $request->validate([
+            'work_package_id' => 'required|exists:work_packages,id',
+            'nom' => 'required|string|max:255',
+            'responsable_id' => 'required|exists:users,id',
+            'date_debut' => 'required|date',
+            'date_fin' => 'required|date|after_or_equal:date_debut',
+            'livrables' => 'present|array', // Reçu de la modale React
+            'livrables.*.titre' => 'required|string',
+            'livrables.*.type' => 'required|string',
+        ]);
 
-    try {
-        return \DB::transaction(function () use ($validated) {
-            // 1. Création de la tâche
-            $tache = Tache::create([
-                'nom' => $validated['nom'],
-                'description' => $validated['description'] ?? '',
-                'date_debut' => $validated['date_debut'],
-                'date_fin' => $validated['date_fin'],
-                'responsable_id' => $validated['responsable_id'],
-                'work_package_id' => $validated['work_package_id'],
-                'etat' => 'A faire', // État initial par défaut
-            ]);
+        try {
+            $result = DB::transaction(function () use ($validated) {
+                // 1. Trouver le projet_id via le WP pour lier le livrable au projet
+                $wp = WorkPackage::findOrFail($validated['work_package_id']);
 
-            // 2. Création des livrables "vides" associés
-            if (!empty($validated['livrables'])) {
-                foreach ($validated['livrables'] as $livrableData) {
+                // 2. Créer la tâche
+                $tache = Tache::create([
+                    'work_package_id' => $validated['work_package_id'],
+                    'nom' => $validated['nom'],
+                    'responsable_id' => $validated['responsable_id'],
+                    'date_debut' => $validated['date_debut'],
+                    'date_fin' => $validated['date_fin'],
+                    'etat' => 'A faire',
+                ]);
+
+                // 3. Créer les livrables "placeholders" (en attente de fichier)
+                foreach ($validated['livrables'] as $livData) {
                     $tache->livrables()->create([
-                        'titre' => $livrableData['titre'],
-                        'type' => $livrableData['type'],
-                        'fichier_path' => 'waiting_upload', // Marqueur pour le front-end
-                        'date_depot' => null,
+                        'projet_id' => $wp->projet_id,
+                        'titre' => $livData['titre'],
+                        'type' => $livData['type'],
+                        'fichier_path' => 'waiting_upload', // Marqueur essentiel pour votre logique Front-end
                     ]);
                 }
-            }
 
-            return response()->json([
-                'message' => 'Tâche et livrables créés avec succès',
-                'tache' => $tache->load('livrables')
-            ], 201);
-        });
-    } catch (\Exception $e) {
-        return response()->json(['message' => 'Erreur lors de la création : ' . $e.getMessage()], 500);
+                return $tache->load('livrables');
+            });
+
+            return response()->json($result, 201);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
-}
 
 
     public function show($id)
@@ -108,13 +108,18 @@ class TacheController extends Controller
 }
 
     public function mesTaches()
-{
-    // Récupère les tâches assignées à l'utilisateur avec les infos du projet
-    return Tache::where('responsable_id', auth()->id())
-        ->with(['workPackage.projet'])
-        ->orderBy('date_fin', 'asc')
-        ->get();
-}
+    {
+        $userId = auth()->id();
+        
+        if (!$userId) {
+            return response()->json(['message' => 'Non authentifié'], 401);
+        }
+
+        return Tache::where('responsable_id', $userId)
+            ->with(['workPackage.projet'])
+            ->orderBy('updated_at', 'asc')
+            ->get();
+    }
 
 
 
