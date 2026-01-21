@@ -1,16 +1,17 @@
-import { Outlet, Navigate, Link } from "react-router-dom";
+import { Outlet, Navigate } from "react-router-dom";
 import { useStateContext } from "../context/ContextProvider";
-import Sidebar from "../components/Sidebar"; // Assurez-vous que votre composant Sidebar accepte les nouvelles props de style
+import Sidebar from "../components/Sidebar";
+import axiosClient from "../api/axios"; // Import de l'instance axios
 import { 
   ClipboardList, CheckCircle2, FileStack, Users2, 
-  Loader2, layoutDashboard, LayoutGrid, Bell, 
+  Loader2, LayoutGrid, Bell, LogOut,
   Settings, ChevronRight, Fingerprint
 } from "lucide-react";
 
 export default function ChefDivisionLayout() {
-  const { user, token } = useStateContext();
+  const { user, token, setUser, setToken } = useStateContext();
 
-  if (!token) return <Navigate to="/login" replace />;
+  if (user.roles[0] !== "ChefDivision") return <Navigate to="/unauthorized" replace />;
 
   if (!user) {
     return (
@@ -21,8 +22,21 @@ export default function ChefDivisionLayout() {
     );
   }
 
-  // Vérification du rôle
-  if (user.role !== "ChefDivision") return <Navigate to="/unauthorized" replace />;
+
+
+
+  const onLogout = async (e) => {
+    e.preventDefault();
+    try {
+      await axiosClient.post('/logout');
+      setUser(null);
+      setToken(null);
+    } catch (err) {
+      // En cas d'erreur, on force quand même le nettoyage local
+      setUser(null);
+      setToken(null);
+    }
+  };
 
   const links = [
     { label: "Vue d'ensemble", path: "/division/dashboard", icon: <LayoutGrid size={20} /> },
@@ -35,7 +49,6 @@ export default function ChefDivisionLayout() {
   return (
     <div className="flex h-screen bg-[#F8FAFC] font-sans antialiased text-slate-900">
       
-      {/* SIDEBAR : On passe des classes de couleurs spécifiques (Emerald/Slate) */}
       <Sidebar 
         title="Management" 
         subtitle="Division Panel"
@@ -46,7 +59,6 @@ export default function ChefDivisionLayout() {
       
       <div className="flex-1 flex flex-col overflow-hidden">
         
-        {/* HEADER MODERNE */}
         <header className="h-20 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-10 shrink-0 z-40">
           
           <div className="flex items-center gap-4">
@@ -69,19 +81,22 @@ export default function ChefDivisionLayout() {
           </div>
           
           <div className="flex items-center gap-6">
-            {/* Boutons d'actions rapides */}
             <div className="flex items-center gap-2">
                 <button className="p-2.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all">
                     <Bell size={20} />
                 </button>
-                <button className="p-2.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-all">
-                    <Settings size={20} />
+                {/* BOUTON LOGOUT INTÉGRÉ ICI */}
+                <button 
+                  onClick={onLogout}
+                  className="p-2.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all group"
+                  title="Déconnexion"
+                >
+                    <LogOut size={20} className="group-hover:translate-x-0.5 transition-transform" />
                 </button>
             </div>
 
             <div className="h-8 w-px bg-slate-200"></div>
 
-            {/* Profil Manager */}
             <div className="flex items-center gap-4 group cursor-pointer">
               <div className="text-right hidden sm:block">
                 <p className="text-[13px] font-black text-slate-900 leading-none group-hover:text-emerald-600 transition-colors">
@@ -101,10 +116,8 @@ export default function ChefDivisionLayout() {
           </div>
         </header>
 
-        {/* MAIN VIEWPORT AVEC EFFET DE FADE */}
         <main className="flex-1 overflow-y-auto bg-[#F8FAFC] custom-scrollbar">
           <div className="max-w-7xl mx-auto py-10 px-10 animate-in fade-in slide-in-from-bottom-2 duration-700">
-            {/* Breadcrumb minimaliste avant le contenu */}
             <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-8">
                 <span>Manager</span>
                 <ChevronRight size={10} />

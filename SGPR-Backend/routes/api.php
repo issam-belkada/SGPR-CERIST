@@ -37,6 +37,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/users/search', [ProjetController::class, 'searchUsers']);
     Route::get('/mes-projets', [ChercheurController::class, 'getMesProjets']);
     Route::get('/projet-details/{id}', [ChercheurController::class, 'getProjetDetails']);
+
+    Route::get('/division/propositions', [ProjetController::class, 'getPropositions']);
+    Route::put('/projets/{id}/statut', [ProjetController::class, 'updateStatut']);
     
 
     // Gestion de l'équipe

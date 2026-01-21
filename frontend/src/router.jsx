@@ -30,6 +30,14 @@ import BilanPage from "./pages/Chercheur/BilanPage";
 import ListeBilansProjet from "./pages/Chercheur/ListeBilansProjet";
 import VisualisationBilan from "./pages/Chercheur/VisualisationBilan";
 
+
+
+import DashboardDivision from "./pages/Division/DashboardDivision";
+import Propositions from "./pages/Division/Propositions";
+import ValidationBilans from "./pages/Division/ValidationBilans";
+import ListeProjetsDivision from "./pages/Division/ListeProjetsDivision";
+import MembresDivision from "./pages/Division/MembresDivision";
+
 const router = createBrowserRouter([
   {
     path: "/",
@@ -68,13 +76,19 @@ const router = createBrowserRouter([
   },
 
   {
-    path: "/division",
-    element: <ChefDivisionLayout />,
-    children: [
-      { index: true, element: <Navigate to="/division/propositions" replace /> },
-      { path: "propositions", element: <div>Propositions de la Division</div> },
-    ],
-  },
+  path: "/division",
+  element: <ChefDivisionLayout />,
+  children: [
+    // Redirection par défaut vers les propositions
+    { index: true, element: <Navigate to="/division/dashboard" replace /> },
+    { path: "dashboard", element: <DashboardDivision /> },
+    { path: "propositions", element: <Propositions /> },
+    { path: "suivi-bilans", element: <ValidationBilans /> },
+    { path: "projets", element: <ListeProjetsDivision /> },
+    { path: "projet/:id", element: <ProjectDetails /> },
+    { path: "membres-structures", element: <MembresDivision /> },
+  ],
+},
 
   {
     path: "/chercheur",

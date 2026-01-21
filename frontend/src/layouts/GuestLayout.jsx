@@ -14,9 +14,7 @@ export default function GuestLayout() {
       case "CS":
         return <Navigate to="/cs/sessions" replace />;
       case "ChefDivision":
-        return <Navigate to="/division/propositions" replace />;
-      case "ChefProjet":
-        return <Navigate to="/chef-projet/pilotage" replace />;
+        return <Navigate to="/division/dashboard" replace />;
       case "Chercheur":
         return <Navigate to="/chercheur/dashboard" replace />;
     }

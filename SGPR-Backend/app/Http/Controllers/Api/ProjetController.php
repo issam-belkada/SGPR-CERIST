@@ -145,6 +145,48 @@ class ProjetController extends Controller
         ], 500);
     }
 }
+  
+
+
+     public function getPropositions(Request $request)
+{
+    $user = $request->user();
+
+    $propositions = Projet::with([
+            'chefProjet',           // Infos du chercheur principal
+            'membres',              // Équipe complète (avec pivot pourcentage)
+            'workPackages.taches',  // Structure technique (WPs et leurs tâches)
+            'division'              // Infos de la division
+        ])
+        ->where('division_id', $user->division_id)
+        ->where('statut', 'Proposé')
+        ->latest()
+        ->get();
+
+    return response()->json($propositions);
+}
+
+
+
+
+    public function updateStatut(Request $request, $id)
+{
+    $projet = Projet::findOrFail($id);
+    
+    // On valide que le nouveau statut est autorisé
+    $validated = $request->validate([
+        'statut' => 'required|in:Validé,Refusé'
+    ]);
+
+    $projet->update([
+        'statut' => $validated['statut']
+    ]);
+
+    return response()->json(['message' => 'Statut mis à jour avec succès']);
+}
+
+
+     
 
     /**
      * Étape 2 : Approbation finale par le Conseil Scientifique.

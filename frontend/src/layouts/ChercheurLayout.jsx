@@ -13,6 +13,8 @@ export default function ChercheurLayout() {
 
   if (!token) return <Navigate to="/login" />;
 
+  if (user.roles[0] !== "Chercheur") return <Navigate to="/unauthorized" replace />;
+
   if (!user || Object.keys(user).length === 0) {
     return (
       <div className="h-screen w-screen flex flex-col items-center justify-center bg-white">

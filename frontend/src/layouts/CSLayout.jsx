@@ -9,6 +9,7 @@ export default function CSLayout() {
 
   // 1. Protection : Redirection si non connecté
   if (!token) return <Navigate to="/login" />;
+  if (user.role !== "ChefCS") return <Navigate to="/unauthorized" />;
 
   // 2. Sécurité : Attendre que l'objet user soit chargé du localStorage
   if (!user) {
@@ -20,7 +21,7 @@ export default function CSLayout() {
   }
 
   // 3. Autorisation : Rôle spécifique ChefCS
-  if (user.role !== "ChefCS") return <Navigate to="/unauthorized" />;
+
 
   const links = [
     { label: "Propositions Nationales", path: "/cs/propositions-nationales", icon: <Globe size={18} /> },
