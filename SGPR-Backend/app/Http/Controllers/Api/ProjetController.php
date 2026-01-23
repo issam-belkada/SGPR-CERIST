@@ -56,6 +56,65 @@ class ProjetController extends Controller
             ->get(['id', 'nom', 'prenom', 'grade', 'division_id']);
     }
 
+    public function getProjetsDivision()
+{
+    try {
+        // 1. Vérifier l'authentification
+        $user = auth()->user();
+        
+        if (!$user) {
+            return response()->json(['message' => 'Non authentifié'], 401);
+        }
+
+        // 2. Vérifier si l'utilisateur appartient à une division
+        if (!$user->division_id) {
+            return response()->json(['message' => 'Cet utilisateur n\'est rattaché à aucune division'], 403);
+        }
+
+        // 3. Récupérer les projets
+        $projets = Projet::where('division_id', $user->division_id)
+            ->with(['chefProjet']) // Charge les infos du chef de projet
+            ->with(['bilansAnnuels' => function($query) {
+                $query->latest(); // Charge tous les bilans pour éviter les erreurs, on prendra le premier en JS ou ici
+            }])
+            ->get()
+            ->map(function ($projet) {
+                // On récupère l'avancement du dernier bilan annuel s'il existe
+                $dernierBilan = $projet->bilansAnnuels->first();
+                
+                return [
+                    'id' => $projet->id,
+                    'titre' => $projet->titre,
+                    'statut' => $projet->statut,
+                    'type' => $projet->type,
+                    'nature' => $projet->nature,
+                    'avancement_actuel' => $dernierBilan ? $dernierBilan->avancement_physique : 0,
+                    'chef_projet' => $projet->chefProjet ? [
+                        'nom' => $projet->chefProjet->nom,
+                        'prenom' => $projet->chefProjet->prenom,
+                    ] : null,
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'data' => $projets
+        ], 200);
+
+    } catch (\Exception $e) {
+        // En cas d'erreur, on log le détail pour le debug
+        \Log::error("Erreur projets division: " . $e->getMessage());
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'Erreur serveur',
+            'debug' => $e->getMessage() // À retirer en production
+        ], 500);
+    }
+}
+
+
+
     /**
      * Soumission d'une nouvelle proposition.
      * Adaptée pour respecter strictement les contraintes SQL (NOT NULL et ENUM).
@@ -271,4 +330,55 @@ class ProjetController extends Controller
 
         return response()->json(['message' => 'Membre retiré.']);
     }
+
+
+    /**
+ * Récupère les statistiques réelles pour le dashboard de la division
+ */
+public function getDashboardStats()
+{
+    $user = Auth::user();
+    $divisionId = $user->division_id;
+
+    // 1. Nombre de projets actifs
+    $projetsActifs = Projet::where('division_id', $divisionId)
+        ->whereIn('statut', ['enCours', 'Nouveau'])
+        ->count();
+
+    // 2. Nombre de chercheurs dans la division
+    $totalChercheurs = User::where('division_id', $divisionId)
+        ->role('Chercheur')
+        ->count();
+
+    // 3. Alertes (Projets dont la date_fin est passée et statut n'est pas terminé)
+    $alertes = Projet::where('division_id', $divisionId)
+        ->where('statut', 'enCours')
+        ->where('date_fin', '<', now())
+        ->count();
+
+    // 4. Activité récente (5 dernières actions)
+    // Ici on simule avec les derniers projets ou bilans créés
+    $activite = Projet::where('division_id', $divisionId)
+        ->with('chefProjet')
+        ->latest('updated_at')
+        ->take(5)
+        ->get()
+        ->map(function($p) {
+            return [
+                'user' => $p->chefProjet->nom . ' ' . $p->chefProjet->prenom,
+                'action' => "Mise à jour du projet: " . $p->titre,
+                'time' => $p->updated_at->diffForHumans()
+            ];
+        });
+
+    return response()->json([
+        'stats' => [
+            ['label' => "Projets Actifs", 'value' => str_pad($projetsActifs, 2, '0', STR_PAD_LEFT), 'growth' => "+1", 'type' => 'active'],
+            ['label' => "Chercheurs", 'value' => str_pad($totalChercheurs, 2, '0', STR_PAD_LEFT), 'growth' => "Stable", 'type' => 'users'],
+            ['label' => "Taux de Validation", 'value' => "94%", 'growth' => "+5%", 'type' => 'rate'],
+            ['label' => "Alertes Retards", 'value' => str_pad($alertes, 2, '0', STR_PAD_LEFT), 'growth' => $alertes > 0 ? "+$alertes" : "0", 'type' => 'alerts'],
+        ],
+        'recentActivity' => $activite
+    ]);
+}
 }

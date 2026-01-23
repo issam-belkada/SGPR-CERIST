@@ -5,6 +5,7 @@ import axiosClient from "../api/axios"; // Import de l'instance axios
 import { 
   ClipboardList, CheckCircle2, FileStack, Users2, 
   Loader2, LayoutGrid, Bell, LogOut,
+  FolderRoot,
   Settings, ChevronRight, Fingerprint
 } from "lucide-react";
 
@@ -44,8 +45,10 @@ export default function ChefDivisionLayout() {
     { label: "Vue d'ensemble", path: "/division/dashboard", icon: <LayoutGrid size={20} /> },
     { label: "Propositions", path: "/division/propositions", icon: <ClipboardList size={20} /> },
     { label: "Suivi Bilans", path: "/division/suivi-bilans", icon: <CheckCircle2 size={20} /> },
-    { label: "Rapports Division", path: "/division/rapport-division", icon: <FileStack size={20} /> },
+    { label: "Rediger Bilan", path: "rediger-bilan-division", icon: <FileStack size={20} /> },
     { label: "Équipe & Projets", path: "/division/membres-structures", icon: <Users2 size={20} /> },
+    { label: "Liste-Bilans", path: "/division/Liste-Bilans", icon: <Settings size={20} /> },
+    { label: "Liste Projets", path: "/division/projets", icon: <FolderRoot size={20} /> },
   ];
 
   return (

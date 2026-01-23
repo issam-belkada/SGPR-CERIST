@@ -12,28 +12,20 @@ return new class extends Migration
      */
     public function up(): void
 {
-    // 1. Convertir temporairement la colonne en texte simple
+    // 1. Supprimer l'ancienne contrainte si elle existe
+    DB::statement("ALTER TABLE bilans_annuels DROP CONSTRAINT IF EXISTS bilans_annuels_etat_validation_check");
+
+    // 2. Convertir temporairement la colonne en texte simple
     DB::statement("ALTER TABLE bilans_annuels ALTER COLUMN etat_validation TYPE VARCHAR(255)");
 
-    // 2. Nettoyer les données (remplacer les anciennes valeurs par les nouvelles sans accents)
+    // 3. Nettoyer les données (enlever les accents)
     DB::table('bilans_annuels')->where('etat_validation', 'Validé')->update(['etat_validation' => 'Valide']);
     DB::table('bilans_annuels')->where('etat_validation', 'Rejeté')->update(['etat_validation' => 'Rejete']);
-    // On nettoie aussi les brouillons si nécessaire
-    DB::table('bilans_annuels')->where('etat_validation', 'Brouillon')->update(['etat_validation' => 'Brouillon']); 
 
-    // 3. Redéfinir l'ENUM proprement sans accents
-    // Note: Sur Postgres, on utilise souvent VARCHAR + Check constraint pour simuler l'ENUM de Laravel
+    // 4. Ajouter la nouvelle contrainte propre (sans accents)
     DB::statement("ALTER TABLE bilans_annuels ADD CONSTRAINT bilans_annuels_etat_validation_check 
                    CHECK (etat_validation IN ('Brouillon', 'Soumis', 'Valide', 'Rejete'))");
 }
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        Schema::table('bilans_annuels', function (Blueprint $table) {
-            //
-        });
-    }
+
 };

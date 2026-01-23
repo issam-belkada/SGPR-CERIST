@@ -14,7 +14,7 @@ export default function AdminLayout() {
   const navigate = useNavigate();
 
   if (!token) return <Navigate to="/login" replace />;
-  
+
   if (user.roles[0] !== "Admin") return <Navigate to="/unauthorized" replace />;
 
   if (!user) return (
@@ -36,7 +36,6 @@ export default function AdminLayout() {
     { label: "Dashboard", path: "/admin/dashboard", icon: <LayoutDashboard size={20} /> },
     { label: "Utilisateurs", path: "/admin/users", icon: <Users size={20} /> },
     { label: "Divisions", path: "/admin/divisions", icon: <Building2 size={20} /> },
-    { label: "Logs Système", path: "/admin/logs", icon: <ShieldCheck size={20} /> },
   ];
 
   return (

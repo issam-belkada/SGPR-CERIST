@@ -37,6 +37,9 @@ import Propositions from "./pages/Division/Propositions";
 import ListeProjetsDivision from "./pages/Division/ListeProjetsDivision";
 import MembresDivision from "./pages/Division/MembresDivision";
 import SuiviBilans from "./pages/Division/SuiviBilans";
+import RedigerBilanDivision from "./pages/Division/RedigerBilanDivision";
+import ListeBilansDivision from "./pages/Division/ListeBilansDivision";
+import VueDetailleeBilanConsolide from "./pages/Division/VueDetailleeBilan";
 
 const router = createBrowserRouter([
   {
@@ -84,9 +87,12 @@ const router = createBrowserRouter([
     { path: "dashboard", element: <DashboardDivision /> },
     { path: "propositions", element: <Propositions /> },
     { path: "suivi-bilans", element: <SuiviBilans /> },
-    { path: "projets", element: <ListeProjetsDivision /> },
+      { path: "projets", element: <ListeProjetsDivision /> },
+    { path: "rediger-bilan-division", element: <RedigerBilanDivision/>},
     { path: "projet/:id", element: <ProjectDetails /> },
-    { path: "membres-structures", element: <MembresDivision /> },
+      { path: "membres-structures", element: <MembresDivision /> },
+      { path: "Liste-Bilans", element: <ListeBilansDivision /> },
+    { path: "bilan-consolide/:id", element: <VueDetailleeBilanConsolide/>},
   ],
 },
 

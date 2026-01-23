@@ -14,7 +14,7 @@ use App\Http\Controllers\Api\SessionCsController;
 use App\Http\Controllers\Api\BilanAnnuelCsController;
 use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\ChercheurController;
-use App\Http\Controllers\Api\ProjetController as ApiProjetController;
+
 use App\Http\Controllers\Api\TacheController;
 use App\Http\Controllers\Api\LivrableController;
 
@@ -40,6 +40,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/division/propositions', [ProjetController::class, 'getPropositions']);
     Route::put('/projets/{id}/statut', [ProjetController::class, 'updateStatut']);
+    Route::get('/division/projets', [ProjetController::class, 'getProjetsDivision']);
+    Route::get('/division/dashboard-stats', [ProjetController::class, 'getDashboardStats']);
     
 
     // Gestion de l'équipe
@@ -92,9 +94,15 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
     // Gestion du Bilan de Division
-    Route::post('/bilans-division', [BilanDivisionController::class, 'store']);
-    Route::patch('/bilans-division/{bilanDivision}/transmettre', [BilanDivisionController::class, 'transmettreAuCS']);
-    Route::get('/bilans-division/{bilanDivision}/pdf', [BilanDivisionController::class, 'telechargerPDF']);
+    Route::get('/division/pre-remplir-bilan', [BilanDivisionController::class, 'getBilansValides']);
+    Route::post( '/division/bilan-annuel', [BilanDivisionController::class, 'store']);
+    Route::get('division/mes-bilans', [BilanDivisionController::class, 'index']);
+    // api.php
+Route::get('/division/bilan-complet/{id}', [BilanDivisionController::class, 'showComplet']);
+    
+    // Transmettre un bilan au CS
+    Route::put('/bilans/{id}/transmettre', [BilanDivisionController::class, 'transmettre']);
+    Route::get('/division/bilans-consolides/{id}/pdf', [BilanDivisionController::class, 'telechargerPDF']);
 
 
     // --- MODULE CONSEIL SCIENTIFIQUE (CS) ---

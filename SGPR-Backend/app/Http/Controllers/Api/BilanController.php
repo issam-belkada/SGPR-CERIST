@@ -178,34 +178,24 @@ class BilanController extends Controller
      */
     public function validerBilan(Request $request, $id)
 {
-    // On accepte "Valide" (système) ou "Validé" (humain)
+    // On valide les nouvelles valeurs système (sans accents)
     $request->validate([
-        'etat_validation' => 'required|in:Validé,Rejeté,Valide,Rejete',
+        'etat_validation' => 'required|in:Valide,Rejete', 
     ]);
 
     try {
-        DB::beginTransaction();
         $bilan = BilanAnnuel::findOrFail($id);
-
-        // Conversion vers la valeur exacte de votre ENUM migration ('Validé')
-        // Mais pour plus de sécurité avec Postgres, on force le format texte
-        $newStatus = ($request->etat_validation === 'Valide') ? 'Validé' : 
-                     (($request->etat_validation === 'Rejete') ? 'Rejeté' : $request->etat_validation);
-
-        $bilan->etat_validation = $newStatus;
+        $bilan->etat_validation = $request->etat_validation;
         $bilan->save();
 
-        DB::commit();
-
         return response()->json([
-            'message' => "Statut mis à jour avec succès.",
+            'message' => "Le bilan a été mis à jour.",
             'bilan' => $bilan
         ], 200);
 
     } catch (\Exception $e) {
-        DB::rollBack();
         return response()->json([
-            'message' => "Erreur SQL lors de la validation.",
+            'message' => "Erreur lors de la mise à jour.",
             'error' => $e->getMessage()
         ], 500);
     }

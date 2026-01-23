@@ -17,7 +17,7 @@ return new class extends Migration
     $table->year('annee');
     
     // Section 1 : Potentiel chercheur (Nombre total par grade dans la division)
-    $table->json('statistiques_personnel'); // Ex: {"DR": 2, "MRA": 5, "Ing": 3}
+    $table->json('statistiques_personnel'); 
     
     // Section 6, 7, 8 : Activités propres à la division
     $table->text('formation_qualifiante')->nullable();
