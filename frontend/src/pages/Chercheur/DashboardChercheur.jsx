@@ -3,7 +3,7 @@ import axiosClient from "../../api/axios";
 import { 
   FolderRoot, CheckSquare, Clock, ArrowUpRight, 
   FileText, Activity, Zap, ChevronRight, Loader2,
-  TrendingUp, AlertCircle, Calendar
+  TrendingUp, AlertCircle, Calendar, Target
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -20,7 +20,9 @@ export default function DashboardChercheur() {
           axiosClient.get("/mes-taches")
         ]);
         setStats(resStats.data);
-        setRecentTasks(resTasks.data);
+        // On trie les tâches par date de fin la plus proche pour la timeline
+        const sortedTasks = resTasks.data.sort((a, b) => new Date(a.date_fin) - new Date(b.date_fin));
+        setRecentTasks(sortedTasks);
       } catch (err) {
         console.error("Erreur Dashboard:", err);
       } finally {
@@ -61,7 +63,6 @@ export default function DashboardChercheur() {
            </div>
            <div className="pr-6 pl-2 hidden lg:block text-right border-l border-slate-100 ml-2">
               <p className="text-[10px] font-black text-slate-400 uppercase leading-none">Dernière synchro</p>
-              {/* CORRECTION ICI : '2-digit' au lieu de '2h' */}
               <p className="text-xs font-bold text-slate-700 mt-1">
                 {new Date().toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'})}
               </p>
@@ -72,10 +73,34 @@ export default function DashboardChercheur() {
       {/* --- GRILLE DE STATS PRINCIPALES --- */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
-          { label: "Mes Projets", value: stats?.projets_count || 0, icon: <FolderRoot />, color: "bg-indigo-500", trend: "Projets en cours" },
-          { label: "Tâches à faire", value: stats?.taches_count || 0, icon: <CheckSquare />, color: "bg-amber-500", trend: "Actions requises" },
-          { label: "Livrables", value: stats?.livrables_count || 0, icon: <FileText />, color: "bg-emerald-500", trend: "Documents déposés" },
-          { label: "Productivité", value: stats?.total_hours || "85%", icon: <Activity />, color: "bg-rose-500", trend: "Indice d'activité" },
+          { 
+            label: "Mes Projets", 
+            value: stats?.projets_count || 0, 
+            icon: <FolderRoot />, 
+            color: "bg-indigo-500", 
+            trend: "Collaboration active" 
+          },
+          { 
+            label: "Missions", 
+            value: stats?.taches_count || 0, 
+            icon: <CheckSquare />, 
+            color: "bg-amber-500", 
+            trend: `${stats?.taches_terminees || 0} terminées` 
+          },
+          { 
+            label: "Livrables", 
+            value: stats?.livrables_count || 0, 
+            icon: <FileText />, 
+            color: "bg-emerald-500", 
+            trend: "Documents déposés" 
+          },
+          { 
+            label: "Complétion", 
+            value: `${stats?.ratio_completion || 0}%`, 
+            icon: <Target />, 
+            color: "bg-rose-500", 
+            trend: "Objectifs atteints" 
+          },
         ].map((stat, i) => (
           <div key={i} className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-2xl hover:border-indigo-100 transition-all duration-500 group relative overflow-hidden">
              <div className="relative z-10">
@@ -97,13 +122,13 @@ export default function DashboardChercheur() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         
-        {/* --- LISTE DES TÂCHES PRIORITAIRES --- */}
+        {/* --- TIMELINE DES TÂCHES --- */}
         <div className="lg:col-span-8 space-y-6">
           <div className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm relative overflow-hidden">
             <div className="flex justify-between items-center mb-8">
                <div>
                  <h3 className="font-black text-slate-800 text-xl tracking-tight">Timeline des travaux</h3>
-                 <p className="text-slate-400 text-xs font-medium">Les prochaines étapes cruciales.</p>
+                 <p className="text-slate-400 text-xs font-medium">Vos prochaines échéances prioritaires.</p>
                </div>
                <Link to="/chercheur/mes-taches" className="bg-slate-50 hover:bg-indigo-50 text-indigo-600 px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-colors flex items-center gap-2">
                  Voir tout <ChevronRight size={14} />
@@ -124,17 +149,17 @@ export default function DashboardChercheur() {
                   
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                      <span className={`w-1.5 h-1.5 rounded-full ${tache.etat === 'Terminé' ? 'bg-emerald-400' : 'bg-amber-400'}`} />
                       <p className="font-black text-slate-800 text-sm uppercase tracking-tight truncate max-w-[200px] md:max-w-md">
                         {tache.nom}
                       </p>
                     </div>
                     <div className="flex items-center gap-3">
                       <p className="text-[10px] text-slate-400 font-bold uppercase truncate max-w-[250px]">
-                        {tache.work_package?.projet?.titre || 'Projet sans titre'}
+                        {tache.work_package?.projet?.titre || 'Projet'}
                       </p>
                       <span className="px-2 py-0.5 bg-slate-100 text-slate-500 rounded text-[8px] font-black uppercase tracking-tighter">
-                        WP {tache.work_package?.numero || 'N/A'}
+                        WP {tache.work_package?.code_wp || 'N/A'}
                       </span>
                     </div>
                   </div>
@@ -146,7 +171,7 @@ export default function DashboardChercheur() {
               )) : (
                 <div className="text-center py-12">
                   <AlertCircle className="mx-auto text-slate-200 mb-2" size={32} />
-                  <p className="text-slate-400 font-bold text-[10px] uppercase">Aucune tâche active pour le moment</p>
+                  <p className="text-slate-400 font-bold text-[10px] uppercase">Aucune tâche assignée</p>
                 </div>
               )}
             </div>
@@ -155,14 +180,12 @@ export default function DashboardChercheur() {
 
         {/* --- ACTIONS RAPIDES & INSIGHTS --- */}
         <div className="lg:col-span-4 space-y-8">
-          
-          {/* Action : Soumission */}
           <div className="bg-slate-900 rounded-[3rem] p-10 text-white relative overflow-hidden group shadow-2xl shadow-slate-200">
             <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full -mr-16 -mt-16 blur-3xl" />
             <Zap className="text-indigo-400 mb-6 group-hover:animate-bounce" size={32} />
-            <h3 className="text-2xl font-black mb-4 leading-tight">Nouvelle Recherche ?</h3>
+            <h3 className="text-2xl font-black mb-4 leading-tight">Nouveau Projet ?</h3>
             <p className="text-slate-400 text-xs font-medium mb-8 leading-relaxed italic">
-              Soumettez votre proposition à la commission scientifique en quelques clics.
+              Proposez une nouvelle thématique de recherche à la direction du CERIST.
             </p>
             <Link 
               to="/chercheur/proposer-projet" 
@@ -172,29 +195,26 @@ export default function DashboardChercheur() {
             </Link>
           </div>
 
-          {/* Widget Calendrier/Prochain rendez-vous */}
           <div className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm">
             <h4 className="font-black text-slate-800 flex items-center gap-2 mb-6 uppercase text-[10px] tracking-widest">
-              <Calendar size={14} className="text-indigo-500" /> Agenda CERIST
+              <Calendar size={14} className="text-indigo-500" /> État des dépôts
             </h4>
             <div className="space-y-6">
-              <div className="flex gap-4">
-                <div className="w-1 h-10 bg-indigo-500 rounded-full" />
-                <div>
-                  <p className="text-[10px] font-black text-slate-800 uppercase leading-none">Commission Scientifique</p>
-                  <p className="text-[10px] text-slate-400 font-bold mt-1">Lundi prochain • 10:00</p>
-                </div>
+              <div className="flex justify-between items-end">
+                <p className="text-[10px] font-black text-slate-400 uppercase">Progression Globale</p>
+                <span className="text-xl font-black text-indigo-600">{stats?.ratio_completion || 0}%</span>
               </div>
-              <div className="flex gap-4">
-                <div className="w-1 h-10 bg-rose-500 rounded-full" />
-                <div>
-                  <p className="text-[10px] font-black text-slate-800 uppercase leading-none">Deadline Bilans</p>
-                  <p className="text-[10px] text-slate-400 font-bold mt-1">Fin de semaine</p>
-                </div>
+              <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-indigo-500 transition-all duration-1000" 
+                  style={{ width: `${stats?.ratio_completion || 0}%` }}
+                />
               </div>
+              <p className="text-[9px] text-slate-400 italic">
+                Basé sur {stats?.taches_terminees || 0} tâches finalisées sur {stats?.taches_count || 0}.
+              </p>
             </div>
           </div>
-
         </div>
       </div>
     </div>

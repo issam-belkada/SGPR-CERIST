@@ -87,36 +87,34 @@ class LivrableController extends Controller
 
 
 
-     public function updateMissingLivrable(Request $request, $id)
+    public function updateMissingLivrable(Request $request, $id)
 {
-    // 1. Validation (Titre optionnel car déjà défini par le CP, mais on laisse la liberté)
     $request->validate([
-        'titre' => 'sometimes|required|string|max:255',
-        'type' => 'required|in:Rapport_Technique,Manuel_Utilisateur,Code_Source,Synthese_Biblio,Expertise,Logiciel_Code,Prototype,Publication,Brevet,Autre',
-        'fichier' => 'required|file|max:20480', // 20Mo
+        'fichier' => 'required|file|max:20480', 
     ]);
 
-    // 2. Trouver le livrable spécifique
     $livrable = Livrable::findOrFail($id);
 
-    // Sécurité : Vérifier s'il appartient bien à la tâche
-    if ($livrable->tache_id != $request->tache_id) {
-        return response()->json(['message' => 'Action non autorisée'], 403);
+    // Récupération du projetId via le livrable ou la hiérarchie des tâches
+    $projetId = $livrable->projet_id;
+
+    if (!$projetId && $livrable->tache) {
+        $projetId = $livrable->tache->workPackage->projet_id;
     }
 
-    // 3. Stockage du fichier
+    if (!$projetId) {
+        return response()->json(['message' => 'Impossible d\'identifier le projet associé.'], 422);
+    }
+
     if ($request->hasFile('fichier')) {
-        // On récupère le projetId via la relation
-        $projetId = $livrable->projet_id;
+        // CHANGEMENT ICI : On retire ', "public"' pour utiliser le stockage par défaut
         $path = $request->file('fichier')->store('livrables/projet_' . $projetId);
 
-        // 4. Mise à jour au lieu de Création
         $livrable->update([
-            'titre' => $request->titre ?? $livrable->titre,
-            'type' => $request->type ?? $livrable->type,
             'fichier_path' => $path,
             'date_depot' => now(),
-            'depose_par' => auth()->id() // Celui qui fait l'upload devient le dépositaire
+            'depose_par' => auth()->id(),
+            'projet_id' => $projetId 
         ]);
 
         return response()->json($livrable, 200);
@@ -154,22 +152,20 @@ public function destroy(Livrable $livrable)
 
 
 
-
-
-    public function download(Livrable $livrable)
+public function download(Livrable $livrable)
 {
-    // Debug : Vérifiez si le chemin stocké en base correspond au dossier storage/app/
+    // On utilise Storage:: sans spécifier de disque (utilise le disque par défaut 'local')
     if (!Storage::exists($livrable->fichier_path)) {
-        return response()->json(['error' => 'Fichier introuvable'], 404);
+        return response()->json([
+            'error' => 'Fichier introuvable sur le serveur',
+            'path' => $livrable->fichier_path 
+        ], 404);
     }
 
-    // Récupérer l'extension originale du fichier stocké
     $extension = pathinfo($livrable->fichier_path, PATHINFO_EXTENSION);
-    
-    // Nettoyer le nom du fichier pour éviter les problèmes d'espaces
-    $slugTitre = Str::slug($livrable->titre);
-    $fileName = $slugTitre . '.' . $extension;
+    $fileName = Str::slug($livrable->titre) . '.' . $extension;
 
+    // Téléchargement depuis le disque par défaut
     return Storage::download($livrable->fichier_path, $fileName);
 }
 }

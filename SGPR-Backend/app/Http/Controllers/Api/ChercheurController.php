@@ -120,15 +120,21 @@ class ChercheurController extends Controller
             $q->where('user_id', $user->id);
         })->count();
 
-    // 2. Compter ses tâches personnelles (toutes celles dont il est responsable)
+    // 2. Compter ses tâches personnelles
     $tachesCount = \App\Models\Tache::where('responsable_id', $user->id)->count();
 
-    // 3. Compter les tâches terminées pour calculer un ratio
+    // 3. Compter les tâches terminées
     $tachesTerminees = \App\Models\Tache::where('responsable_id', $user->id)
         ->where('etat', 'Terminé')
         ->count();
 
-    // 4. Récupérer les 3 prochaines échéances (tâches non finies)
+    // --- AJOUT : Compter les livrables déposés par ce chercheur ---
+    // On exclut 'waiting_upload' pour ne compter que les fichiers réellement envoyés
+    $livrablesCount = \App\Models\Livrable::where('depose_par', $user->id)
+        ->where('fichier_path', '!=', 'waiting_upload')
+        ->count();
+
+    // 4. Récupérer les 3 prochaines échéances
     $prochainesEcheances = \App\Models\Tache::where('responsable_id', $user->id)
         ->where('etat', '!=', 'Terminé')
         ->with('workPackage.projet')
@@ -140,6 +146,7 @@ class ChercheurController extends Controller
         'projets_count' => $projetsCount,
         'taches_count' => $tachesCount,
         'taches_terminees' => $tachesTerminees,
+        'livrables_count' => $livrablesCount, // Nouvelle stat
         'ratio_completion' => $tachesCount > 0 ? round(($tachesTerminees / $tachesCount) * 100) : 0,
         'echeances' => $prochainesEcheances
     ]);

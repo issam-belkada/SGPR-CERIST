@@ -1,10 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react"; // Ajout de useMemo
 import { useNavigate } from "react-router-dom";
 import axiosClient from "../../api/axios";
 import { 
   CheckCircle2, Clock, AlertCircle, 
-  Calendar, ArrowRight, Loader2, Filter,
-  LayoutGrid, List
+  Calendar, ArrowRight, Loader2
 } from "lucide-react";
 
 export default function MesTaches() {
@@ -28,10 +27,13 @@ export default function MesTaches() {
     }
   };
 
-  // Logique de filtrage
-  const filteredTaches = taches.filter(t => 
-    filter === "toutes" ? true : t.etat === filter
-  );
+  // --- LOGIQUE DE FILTRAGE ET TRI ---
+  // On utilise useMemo pour ne recalculer le tri que si 'taches' ou 'filter' changent
+  const filteredTaches = useMemo(() => {
+    return taches
+      .filter(t => (filter === "toutes" ? true : t.etat === filter))
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at)); // Tri décroissant (plus récent en haut)
+  }, [taches, filter]);
 
   if (loading) return (
     <div className="h-96 flex items-center justify-center">
@@ -112,18 +114,15 @@ export default function MesTaches() {
                 <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-2 py-0.5 bg-slate-100 rounded-md">
                   {tache.work_package?.code_wp}
                 </span>
+                {/* Affichage de la date */}
+                <span className="text-[9px] font-bold text-slate-400 flex items-center gap-1 ml-auto md:ml-0">
+                  <Calendar size={10} /> {new Date(tache.created_at).toLocaleDateString()}
+                </span>
               </div>
               
               <h3 className="font-black text-slate-800 text-xl leading-tight group-hover:text-indigo-600 transition-colors">
                 {tache.nom}
               </h3>
-
-              <div className="flex items-center justify-center md:justify-start gap-4 text-slate-400 font-bold text-[11px]">
-                <span className="flex items-center gap-1.5">
-                  <Calendar size={14} className="text-slate-300"/> 
-                  Échéance : {new Date(tache.date_fin).toLocaleDateString()}
-                </span>
-              </div>
             </div>
 
             {/* Badge de Statut & Action */}
