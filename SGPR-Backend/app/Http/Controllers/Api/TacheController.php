@@ -18,8 +18,7 @@ class TacheController extends Controller
             'work_package_id' => 'required|exists:work_packages,id',
             'nom' => 'required|string|max:255',
             'responsable_id' => 'required|exists:users,id',
-            'date_debut' => 'required|date',
-            'date_fin' => 'required|date|after_or_equal:date_debut',
+            'description' => 'required|max:255',
             'livrables' => 'present|array', // Reçu de la modale React
             'livrables.*.titre' => 'required|string',
             'livrables.*.type' => 'required|string',
@@ -35,8 +34,7 @@ class TacheController extends Controller
                     'work_package_id' => $validated['work_package_id'],
                     'nom' => $validated['nom'],
                     'responsable_id' => $validated['responsable_id'],
-                    'date_debut' => $validated['date_debut'],
-                    'date_fin' => $validated['date_fin'],
+                    'description' => $validated['description'],
                     'etat' => 'A faire',
                 ]);
 

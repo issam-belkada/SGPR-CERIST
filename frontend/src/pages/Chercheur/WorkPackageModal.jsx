@@ -6,6 +6,7 @@ export default function WorkPackageModal({ projet, onClose, onRefresh }) {
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         titre: '',
+        // On génère le code basé sur le nombre actuel de WP
         code_wp: `WP${(projet.work_packages?.length || 0) + 1}`,
         objectifs: '',
         projet_id: projet.id
@@ -15,10 +16,12 @@ export default function WorkPackageModal({ projet, onClose, onRefresh }) {
         e.preventDefault();
         setLoading(true);
         try {
-            await axiosClient.post('/work-packages', formData);
+            // Utilisation des backticks (`) pour injecter dynamiquement l'ID du projet
+            await axiosClient.post(`/projets/${projet.id}/work-packages`, formData);
             onRefresh();
             onClose();
         } catch (err) {
+            console.error(err);
             alert("Erreur lors de la création du WP");
         } finally {
             setLoading(false);
@@ -28,6 +31,7 @@ export default function WorkPackageModal({ projet, onClose, onRefresh }) {
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
             <div className="bg-white w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in duration-300">
+                {/* Header */}
                 <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-lg">
@@ -35,9 +39,12 @@ export default function WorkPackageModal({ projet, onClose, onRefresh }) {
                         </div>
                         <h2 className="text-xl font-black text-slate-800 uppercase tracking-tight">Nouveau Lot (WP)</h2>
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-white rounded-full transition-colors"><X size={20} /></button>
+                    <button onClick={onClose} className="p-2 hover:bg-white rounded-full transition-colors text-slate-400 hover:text-slate-600">
+                        <X size={20} />
+                    </button>
                 </div>
 
+                {/* Formulaire */}
                 <form onSubmit={handleSubmit} className="p-8 space-y-6">
                     <div className="grid grid-cols-4 gap-4">
                         <div className="col-span-1">
@@ -65,8 +72,9 @@ export default function WorkPackageModal({ projet, onClose, onRefresh }) {
                     </div>
 
                     <button type="submit" disabled={loading}
-                        className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-indigo-600 transition-all flex items-center justify-center gap-3 shadow-xl shadow-indigo-100">
-                        {loading ? <Loader2 className="animate-spin" /> : <Save size={18} />} Créer le WP
+                        className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-indigo-600 transition-all flex items-center justify-center gap-3 shadow-xl shadow-indigo-100 disabled:opacity-50">
+                        {loading ? <Loader2 className="animate-spin" /> : <Save size={18} />} 
+                        Créer le WP
                     </button>
                 </form>
             </div>
