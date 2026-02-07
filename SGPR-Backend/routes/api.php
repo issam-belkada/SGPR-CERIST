@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\DivisionController;
 use App\Http\Controllers\api\ProjetController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\WorkPackageController;
@@ -148,6 +149,7 @@ Route::get('/division/bilan-complet/{id}', [BilanDivisionController::class, 'sho
     Route::delete('/divisions/{division}', [AdminController::class, 'destroyDivision']);
     Route::put('/divisions/{division}/assign-chef', [AdminController::class, 'assignChef']);
     Route::get('/mon-entite-division', [ChercheurController::class, 'getMaDivision']);
+    Route::get('/mon-division', [DivisionController::class, 'getDivisionMembres']);
 
     Route::get('/admin/statistics', [AdminController::class, 'getStatistics']);
 
