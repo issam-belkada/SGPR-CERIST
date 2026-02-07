@@ -123,7 +123,7 @@ const ListeBilansProjet = () => {
 
                 {/* FILTRAGE STYLE "PILLS" */}
                 <div className="flex flex-wrap gap-2 p-1.5 bg-slate-50 rounded-2xl w-fit">
-                    {["Tous", "Brouillon", "Soumis", "Validé", "Rejeté"].map((status) => (
+                    {["Tous", "Brouillon", "Soumis", "Valide", "Rejete"].map((status) => (
                         <button
                             key={status}
                             onClick={() => setFilterStatus(status)}
@@ -155,9 +155,9 @@ const ListeBilansProjet = () => {
                         >
                             <div className="flex items-center gap-6">
                                 <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-colors ${
-                                    b.etat_validation === 'Validé' ? 'bg-emerald-50 text-emerald-600' : 
+                                    b.etat_validation === 'Valide' ? 'bg-emerald-50 text-emerald-600' : 
                                     b.etat_validation === 'Soumis' ? 'bg-indigo-50 text-indigo-600' : 
-                                    b.etat_validation === 'Rejeté' ? 'bg-rose-50 text-rose-600' : 'bg-amber-50 text-amber-600'
+                                    b.etat_validation === 'Rejete' ? 'bg-rose-50 text-rose-600' : 'bg-amber-50 text-amber-600'
                                 }`}>
                                     <FileText size={24}/>
                                 </div>
@@ -165,9 +165,9 @@ const ListeBilansProjet = () => {
                                     <h4 className="font-black text-slate-900 uppercase text-lg">Année {b.annee}</h4>
                                     <div className="flex items-center gap-3 mt-1">
                                         <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded-full border ${
-                                            b.etat_validation === 'Validé' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 
+                                            b.etat_validation === 'Valide' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 
                                             b.etat_validation === 'Soumis' ? 'bg-indigo-50 text-indigo-700 border-indigo-100' :
-                                            b.etat_validation === 'Rejeté' ? 'bg-rose-50 text-rose-700 border-rose-100' :
+                                            b.etat_validation === 'Rejete' ? 'bg-rose-50 text-rose-700 border-rose-100' :
                                             'bg-amber-50 text-amber-700 border-amber-100'
                                         }`}>
                                             {b.etat_validation}
