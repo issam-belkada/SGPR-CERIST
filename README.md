@@ -2,7 +2,7 @@
 ### Système de Gestion des Projets de Recherche - CERIST
 
 ![Version](https://img.shields.io/badge/version-2.0.4-blue)
-![Laravel](https://img.shields.io/badge/Backend-Laravel%2011-red)
+![Laravel](https://img.shields.io/badge/Backend-Laravel%2012-red)
 ![React](https://img.shields.io/badge/Frontend-React%2018-blue)
 ![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL-336791)
 ![Tailwind](https://img.shields.io/badge/Styling-Tailwind%20CSS-teal)
