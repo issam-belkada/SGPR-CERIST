@@ -41,7 +41,7 @@ L'application répond à une problématique centrale : automatiser la collecte d
 - **Lucide Icons** : Pack d'icônes optimisé pour l'UX.
 
 **Backend :**
-- **Laravel 11** : Moteur de l'API REST, gestion des migrations et de la logique métier.
+- **Laravel 12** : Moteur de l'API REST, gestion des migrations et de la logique métier.
 - **PostgreSQL** : Gestion rigoureuse des données relationnelles complexes.
 - **Spatie Laravel-Permission** : Gestion des rôles (Admin, Chef de Division, Chercheur).
 
@@ -65,3 +65,19 @@ Le projet suit une architecture découplée permettant une maintenance facilité
    ```bash
    git clone [https://github.com/issam-belkada/SGPR-CERIST.git](https://github.com/issam-belkada/SGPR-CERIST.git)
    cd SGPR-CERIST
+
+
+### Configuration Backend :
+
+cd backend
+composer install
+cp .env.example .env
+php artisan key:generate
+php artisan migrate --seed
+php artisan serve
+
+### Configuration Frontend :
+
+cd frontend
+npm install
+npm run dev
