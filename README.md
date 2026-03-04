@@ -69,15 +69,15 @@ Le projet suit une architecture découplée permettant une maintenance facilité
 
 ### Configuration Backend :
 
-cd backend
-composer install
-cp .env.example .env
-php artisan key:generate
-php artisan migrate --seed
-php artisan serve
+- cd backend
+- composer install
+- cp .env.example .env
+- php artisan key:generate
+- php artisan migrate --seed
+- php artisan serve
 
 ### Configuration Frontend :
 
-cd frontend
-npm install
-npm run dev
+- cd frontend
+- npm install
+- npm run dev
